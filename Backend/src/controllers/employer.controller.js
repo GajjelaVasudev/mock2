@@ -181,7 +181,7 @@ exports.getEmployerProfile = async (req, res) => {
     };
 
     if (isDb) {
-      totalGraduates = await User.countDocuments({ role: 'learner' });
+      totalGraduates = await User.countDocuments({ role: 'student' });
       shortlistedCount = await Pipeline.countDocuments({ stage: 'shortlisted' });
       interviewCount = await Pipeline.countDocuments({ stage: 'interview_scheduled' });
       offeredCount = await Pipeline.countDocuments({ stage: 'offered' });
@@ -415,7 +415,7 @@ exports.getMatchedStudentsForJob = async (req, res) => {
 
     let learners = [];
     if (isDb) {
-      learners = await User.find({ role: 'learner' }).select('-password');
+      learners = await User.find({ role: 'student' }).select('-password');
     }
 
     // Calculate match percentage for every student
@@ -448,7 +448,7 @@ exports.getGraduates = async (req, res) => {
     const { search, center, badge, minScore, status, jobId } = req.query;
     const isDb = mongoose.connection.readyState === 1;
 
-    let query = { role: 'learner' };
+    let query = { role: 'student' };
 
     if (center && center !== 'all') {
       query.center = center;

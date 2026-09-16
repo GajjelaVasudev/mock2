@@ -14,7 +14,7 @@ const DEFAULT_COHORT = [
     phone: '9876543210',
     center: 'Sangam Vihar CDC',
     batch: 'Batch 2026-A',
-    role: 'learner',
+    role: 'student',
     attendanceRate: 92,
     atRisk: false,
     riskReason: '',
@@ -36,7 +36,7 @@ const DEFAULT_COHORT = [
     phone: '9811223344',
     center: 'Sangam Vihar CDC',
     batch: 'Batch 2026-A',
-    role: 'learner',
+    role: 'student',
     attendanceRate: 68,
     atRisk: true,
     riskReason: 'Low attendance (68%) & missed 2 mock interview sessions',
@@ -58,7 +58,7 @@ const DEFAULT_COHORT = [
     phone: '9822334455',
     center: 'Sangam Vihar CDC',
     batch: 'Batch 2026-A',
-    role: 'learner',
+    role: 'student',
     attendanceRate: 96,
     atRisk: false,
     riskReason: '',
@@ -80,7 +80,7 @@ const DEFAULT_COHORT = [
     phone: '9833445566',
     center: 'Sangam Vihar CDC',
     batch: 'Batch 2026-A',
-    role: 'learner',
+    role: 'student',
     attendanceRate: 64,
     atRisk: true,
     riskReason: 'Sudden attendance drop & incomplete customer service assignment',
@@ -102,7 +102,7 @@ const DEFAULT_COHORT = [
     phone: '9844556677',
     center: 'Sangam Vihar CDC',
     batch: 'Batch 2026-A',
-    role: 'learner',
+    role: 'student',
     attendanceRate: 88,
     atRisk: false,
     riskReason: '',
@@ -165,7 +165,7 @@ async function getAllCohortStudents() {
 
   if (isDb) {
     try {
-      const dbStudents = await User.find({ role: 'learner' }).select('-password');
+      const dbStudents = await User.find({ role: 'student' }).select('-password');
       if (dbStudents.length > 0) {
         return dbStudents.map((dbS) => {
           const obj = dbS.toObject();
