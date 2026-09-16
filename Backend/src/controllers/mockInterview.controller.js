@@ -1,4 +1,5 @@
 const mockInterviewAttemptModel = require('../models/mockInterviewAttempt.model');
+const { checkAndAwardBadges } = require('../services/badge.service');
 const skillAssessmentModel = require('../models/skillAssessment.model');
 const learnerModel = require('../models/learner.model');
 const { analyzeMockInterviewResponse } = require('../services/ai.service');
@@ -44,7 +45,7 @@ async function submitMockInterview(req, res) {
         source: 'ai',
         notes: aiResult.feedback
     });
-
+    await checkAndAwardBadges(learner._id);
     return res.status(201).json({ message: 'Mock interview analyzed', attempt });
 }
 
