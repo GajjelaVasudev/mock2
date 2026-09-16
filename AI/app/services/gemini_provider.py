@@ -15,7 +15,7 @@ class GeminiProvider(LLMProvider):
 
     async def generate_response(self, prompt: str) -> str:
         """Simple text generation using Gemini."""
-        response = self.client.models.generate_content(
+        response = await self.client.aio.models.generate_content(
             model='gemini-3.6-flash',
             contents=prompt,
         )
