@@ -7,9 +7,12 @@ import { DashboardPreview } from './components/DashboardPreview';
 import { TrainerDashboard } from './components/TrainerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EmployerDashboard } from './components/EmployerDashboard';
+import { MockInterview } from './components/MockInterview';
+import { StudentDashboard } from './components/StudentDashboard';
 
 export function App() {
   const { user } = useAuth();
+  const [showTest, setShowTest] = useState(false);
 
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -89,17 +92,33 @@ export function App() {
 
       {/* Main View Router */}
       <main className="main-wrapper">
+        {user && (
+          <div style={{ padding: '1rem', textAlign: 'center', background: '#f0f0f0' }}>
+            <button onClick={() => setShowTest(!showTest)} className="btn-primary" style={{ marginBottom: '1rem' }}>
+              {showTest ? 'Close Test Environment' : 'Open AI Test Environment'}
+            </button>
+          </div>
+        )}
+
         {!user ? (
           <LoginPage />
+        ) : showTest ? (
+          <div style={{ padding: '2rem' }}>
+            <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Test Environment</h2>
+            <MockInterview question="Tell me about a time you had to deal with an upset customer. How did you handle it?" />
+          </div>
         ) : user.role === 'admin' ? (
           <AdminDashboard />
         ) : user.role === 'trainer' ? (
           <TrainerDashboard />
         ) : user.role === 'employer' ? (
           <EmployerDashboard />
+        ) : user.role === 'student' || user.role === 'learner' || user.role === 'alumni' ? (
+          <StudentDashboard />
         ) : (
           <DashboardPreview />
-        )}
+        )
+        }
       </main>
 
       {/* Footer */}

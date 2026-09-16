@@ -1,4 +1,6 @@
 const skillAssessmentModel = require('../models/skillAssessment.model');
+const { checkAndAwardBadges } = require('../services/badge.service');
+
 const learnerModel = require('../models/learner.model');
 
 async function submitSelfAssessment(req, res) {
@@ -20,6 +22,7 @@ async function submitSelfAssessment(req, res) {
         source: 'self',
         notes
     });
+    await checkAndAwardBadges(learner._id);
 
     return res.status(201).json({ message: 'Self-assessment submitted', assessment });
 }
