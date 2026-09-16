@@ -21,6 +21,17 @@ export const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  const resetForm = () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    setIdentifier('');
+    setPassword('');
+    setName('');
+    setPhone('');
+    setEmail('');
+    setOrganization('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -37,7 +48,7 @@ export const LoginPage = () => {
       }
     } else {
       if (!name.trim() || !password || (!phone.trim() && !email.trim())) {
-        setErrorMsg('Please enter name, password, and contact details.');
+        setErrorMsg('Please enter your full name, password, and at least one contact method (email or mobile number).');
         return;
       }
       const res = await register({
@@ -84,8 +95,7 @@ export const LoginPage = () => {
           className={`tab-button ${mode === 'login' ? 'active' : ''}`}
           onClick={() => {
             setMode('login');
-            setErrorMsg('');
-            setSuccessMsg('');
+            resetForm();
           }}
         >
           Sign In
@@ -95,8 +105,7 @@ export const LoginPage = () => {
           className={`tab-button ${mode === 'register' ? 'active' : ''}`}
           onClick={() => {
             setMode('register');
-            setErrorMsg('');
-            setSuccessMsg('');
+            resetForm();
           }}
         >
           Register
@@ -123,8 +132,9 @@ export const LoginPage = () => {
           </select>
         </div>
 
-        {mode === 'register' && (
+        {mode === 'register' ? (
           <>
+            {/* Full Name */}
             <div className="form-group">
               <label className="form-label">Full Name</label>
               <div className="input-wrapper">
@@ -140,6 +150,39 @@ export const LoginPage = () => {
               </div>
             </div>
 
+            {/* Email Address */}
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <div className="input-wrapper">
+                <Mail size={15} className="input-icon" />
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="e.g. name@etasha.org"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            {/* Mobile Number */}
+            <div className="form-group">
+              <label className="form-label">Mobile Number</label>
+              <div className="input-wrapper">
+                <Phone size={15} className="input-icon" />
+                <input
+                  type="tel"
+                  className="form-input"
+                  placeholder="e.g. 9876543210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+              </div>
+            </div>
+
+            {/* CDC Center */}
             <div className="form-group">
               <label className="form-label">Training Center (CDC)</label>
               <div className="input-wrapper">
@@ -175,42 +218,24 @@ export const LoginPage = () => {
               </div>
             )}
           </>
-        )}
-
-        {/* Email or Phone */}
-        <div className="form-group">
-          <label className="form-label">
-            {mode === 'login' ? 'Email or Mobile Number' : 'Mobile Number / Email'}
-          </label>
-          <div className="input-wrapper">
-            {mode === 'login' ? (
+        ) : (
+          /* Login Mode: Email or Mobile Number */
+          <div className="form-group">
+            <label className="form-label">Email or Mobile Number</label>
+            <div className="input-wrapper">
               <Mail size={15} className="input-icon" />
-            ) : (
-              <Phone size={15} className="input-icon" />
-            )}
-            <input
-              type="text"
-              className="form-input"
-              placeholder={
-                mode === 'login' ? 'e.g. 9876543210 or user@etasha.org' : 'Mobile number or email'
-              }
-              value={mode === 'login' ? identifier : phone || email}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (mode === 'login') {
-                  setIdentifier(val);
-                } else {
-                  if (val.includes('@')) {
-                    setEmail(val);
-                  } else {
-                    setPhone(val);
-                  }
-                }
-              }}
-              required
-            />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. user@etasha.org or 9876543210"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                autoComplete="username"
+                required
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Password */}
         <div className="form-group">
@@ -225,6 +250,7 @@ export const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             />
             <button
               type="button"

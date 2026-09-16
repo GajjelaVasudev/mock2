@@ -2,31 +2,181 @@ const User = require('../models/User');
 const Pipeline = require('../models/pipeline.model');
 const Placement = require('../models/placement.model');
 const Assessment = require('../models/assessment.model');
+const Attendance = require('../models/attendance.model');
+const Job = require('../models/job.model');
 const mongoose = require('mongoose');
+
+// Default initial jobs for initial DB population & resilience
+const DEFAULT_JOBS = [
+  {
+    title: 'Customer Sales Associate',
+    roleCategory: 'Retail',
+    employerName: 'Apex Retail Partners',
+    contactPerson: 'Rajesh Mehra',
+    email: 'rajesh.employer@etasha.org',
+    phone: '+91 98102 33445',
+    openings: 15,
+    minSalary: 16000,
+    maxSalary: 20000,
+    location: 'South Delhi (Sangam Vihar & Saket)',
+    jobType: 'Full-Time',
+    description: 'Engage with walk-in customers, present lifestyle merchandise, handle queries with active listening, and support POS billing.',
+    requirements: [
+      'Polite spoken English & fluent Hindi',
+      'Positive body language & professional grooming',
+      'Active listening and customer empathy',
+    ],
+    requiredBadges: ['Active Communicator', 'Confidence Champion'],
+    minConfidenceScore: 70,
+    minAttendanceRate: 80,
+    status: 'active',
+  },
+  {
+    title: 'Frontline Cashier & Billing Specialist',
+    roleCategory: 'Retail',
+    employerName: 'Apex Retail Partners',
+    contactPerson: 'Rajesh Mehra',
+    email: 'rajesh.employer@etasha.org',
+    phone: '+91 98102 33445',
+    openings: 8,
+    minSalary: 16500,
+    maxSalary: 21000,
+    location: 'Khanpur & Dakshinpuri CDC Clusters',
+    jobType: 'Full-Time',
+    description: 'Process cash, digital payments, card transactions, issue invoices, maintain daily registers, and handle returns.',
+    requirements: [
+      'Basic numerical accuracy and digital literacy',
+      'Punctuality and high integrity',
+      'Calm communication under busy rush hours',
+    ],
+    requiredBadges: ['Punctuality Star', 'Workplace Ethics'],
+    minConfidenceScore: 65,
+    minAttendanceRate: 85,
+    status: 'active',
+  },
+  {
+    title: 'Customer Support / Tele-Advisor',
+    roleCategory: 'Customer Care / BPO',
+    employerName: 'Apex Voice & Support Hub',
+    contactPerson: 'Anjali Verma',
+    email: 'hiring@apexsupport.org',
+    phone: '+91 98765 43212',
+    openings: 12,
+    minSalary: 18000,
+    maxSalary: 24000,
+    location: 'Noida / Remote Hybrid',
+    jobType: 'Full-Time',
+    description: 'Handle inbound customer queries regarding orders, resolve grievances, update CRM tickets, and provide delightful phone service.',
+    requirements: [
+      'Fluent verbal communication in English and Hindi',
+      'Active listening and phone etiquette',
+      'Ability to navigate computer screens while on calls',
+    ],
+    requiredBadges: ['Active Communicator', 'Communication Star'],
+    minConfidenceScore: 75,
+    minAttendanceRate: 80,
+    status: 'active',
+  },
+  {
+    title: 'Front Desk & Guest Relations Executive',
+    roleCategory: 'Hospitality',
+    employerName: 'Grand Horizon Hospitality',
+    contactPerson: 'Karan Malhotra',
+    email: 'recruiter@grandhorizon.com',
+    phone: '+91 99112 88776',
+    openings: 6,
+    minSalary: 17500,
+    maxSalary: 22500,
+    location: 'Central Delhi & Aerocity',
+    jobType: 'Full-Time',
+    description: 'Welcome hotel and dining guests, manage check-in registers, coordinate visitor inquiries, and deliver warm guest experiences.',
+    requirements: [
+      'Pleasant personality and polished presentation',
+      'Clear spoken English conversation',
+      'Confidence in face-to-face interaction',
+    ],
+    requiredBadges: ['Confidence Champion', 'Customer Service Star'],
+    minConfidenceScore: 72,
+    minAttendanceRate: 85,
+    status: 'active',
+  },
+];
+
+// Helper to calculate student match score against a job
+function calculateMatchScore(student, job) {
+  let score = 0;
+  let totalWeight = 100;
+  const reasons = [];
+
+  const conf = student.softSkillsProfile?.confidenceScore || 65;
+  const comm = student.softSkillsProfile?.communicationScore || 70;
+  const att = student.softSkillsProfile?.attendanceRate || 85;
+  const badges = student.softSkillsProfile?.badgesEarned || [];
+
+  // 1. Confidence Score (30%)
+  if (conf >= job.minConfidenceScore) {
+    score += 30;
+    reasons.push(`Confidence score (${conf}%) meets requirement (>=${job.minConfidenceScore}%)`);
+  } else {
+    score += Math.max(0, Math.round((conf / job.minConfidenceScore) * 30));
+  }
+
+  // 2. Attendance Rate (25%)
+  if (att >= job.minAttendanceRate) {
+    score += 25;
+    reasons.push(`High attendance rate (${att}%)`);
+  } else {
+    score += Math.max(0, Math.round((att / job.minAttendanceRate) * 25));
+  }
+
+  // 3. Badges Match (25%)
+  if (job.requiredBadges && job.requiredBadges.length > 0) {
+    const matchedBadges = job.requiredBadges.filter((b) => badges.includes(b));
+    const badgeRatio = matchedBadges.length / job.requiredBadges.length;
+    score += Math.round(badgeRatio * 25);
+    if (matchedBadges.length > 0) {
+      reasons.push(`Has required badges: ${matchedBadges.join(', ')}`);
+    }
+  } else {
+    score += 25;
+  }
+
+  // 4. Communication & Center Match (20%)
+  if (comm >= 70) {
+    score += 10;
+  }
+  if (job.location && student.center && job.location.toLowerCase().includes(student.center.toLowerCase().split(' ')[0])) {
+    score += 10;
+    reasons.push(`Center located nearby (${student.center})`);
+  } else {
+    score += 5;
+  }
+
+  return {
+    matchPercentage: Math.min(100, Math.max(40, score)),
+    matchReasons: reasons,
+  };
+}
 
 // 1. Get Employer Profile & Overview KPIs
 exports.getEmployerProfile = async (req, res) => {
   try {
     const isDb = mongoose.connection.readyState === 1;
 
-    let totalGraduates = 8;
+    let totalGraduates = 10;
     let shortlistedCount = 0;
     let interviewCount = 0;
     let offeredCount = 0;
     let hiredCount = 0;
+    let activeJobsCount = DEFAULT_JOBS.length;
 
     let company = {
-      name: 'Apex Retail Solutions',
-      contactPerson: 'Rajesh Gupta',
+      name: 'Apex Retail Partners',
+      contactPerson: 'Rajesh Mehra',
       email: 'rajesh.employer@etasha.org',
       phone: '+91 98102 33445',
       industry: 'Organized Retail & Customer Care',
-      locations: ['South Delhi', 'Noida', 'Gurugram'],
-      openPositions: [
-        { title: 'Customer Sales Associate', openings: 15, minSalary: 16000 },
-        { title: 'Frontline Cashier & Billing', openings: 8, minSalary: 15500 },
-        { title: 'Store Inventory Assistant', openings: 5, minSalary: 17000 },
-      ],
+      locations: ['South Delhi', 'Noida', 'Gurugram', 'Saket', 'Khanpur'],
       hiringTarget: 30,
     };
 
@@ -37,13 +187,20 @@ exports.getEmployerProfile = async (req, res) => {
       offeredCount = await Pipeline.countDocuments({ stage: 'offered' });
       hiredCount = await Pipeline.countDocuments({ stage: 'hired' });
 
-      // If user is logged in as employer, load their profile
+      // Seed jobs if empty
+      const jobCount = await Job.countDocuments();
+      if (jobCount === 0) {
+        await Job.insertMany(DEFAULT_JOBS);
+      }
+      activeJobsCount = await Job.countDocuments({ status: 'active' });
+
       if (req.user && req.user._id) {
         const empUser = await User.findById(req.user._id);
         if (empUser) {
           company.contactPerson = empUser.name;
           company.email = empUser.email;
           if (empUser.organization) company.name = empUser.organization;
+          if (empUser.phone) company.phone = empUser.phone;
         }
       }
     }
@@ -53,6 +210,7 @@ exports.getEmployerProfile = async (req, res) => {
       company,
       metrics: {
         totalGraduates,
+        activeJobsCount,
         shortlistedCount,
         interviewCount,
         offeredCount,
@@ -68,26 +226,33 @@ exports.getEmployerProfile = async (req, res) => {
 // 2. Update Employer Registration / Profile
 exports.updateEmployerProfile = async (req, res) => {
   try {
-    const { companyName, contactPerson, industry, phone, openPositions } = req.body;
+    const { companyName, contactPerson, industry, phone, hiringTarget, locations } = req.body;
     const isDb = mongoose.connection.readyState === 1;
 
     if (isDb && req.user && req.user._id) {
-      await User.findByIdAndUpdate(req.user._id, {
-        $set: {
-          name: contactPerson || req.user.name,
-          organization: companyName,
-          phone,
+      await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $set: {
+            name: contactPerson || req.user.name,
+            organization: companyName,
+            phone,
+          },
         },
-      });
+        { returnDocument: 'after' }
+      );
     }
 
     res.status(200).json({
       success: true,
       message: 'Employer profile updated successfully.',
       company: {
-        name: companyName || 'Apex Retail Solutions',
-        contactPerson: contactPerson || 'Rajesh Gupta',
+        name: companyName || 'Apex Retail Partners',
+        contactPerson: contactPerson || 'Rajesh Mehra',
         industry: industry || 'Organized Retail & Customer Care',
+        phone: phone || '+91 98102 33445',
+        hiringTarget: Number(hiringTarget) || 30,
+        locations: locations || ['South Delhi', 'Noida', 'Gurugram'],
       },
     });
   } catch (error) {
@@ -95,10 +260,192 @@ exports.updateEmployerProfile = async (req, res) => {
   }
 };
 
-// 3. View Graduate Profiles & Candidate Search
+// 3. GET All Jobs
+exports.getJobs = async (req, res) => {
+  try {
+    const isDb = mongoose.connection.readyState === 1;
+    let jobs = [];
+
+    if (isDb) {
+      jobs = await Job.find().sort({ createdAt: -1 });
+      if (jobs.length === 0) {
+        jobs = await Job.insertMany(DEFAULT_JOBS);
+      }
+    } else {
+      jobs = DEFAULT_JOBS;
+    }
+
+    res.status(200).json({
+      success: true,
+      count: jobs.length,
+      jobs,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 4. POST Create New Job
+exports.createJob = async (req, res) => {
+  try {
+    const {
+      title,
+      roleCategory = 'Retail',
+      employerName = 'Apex Retail Partners',
+      openings = 5,
+      minSalary = 16000,
+      maxSalary = 20000,
+      location = 'South Delhi',
+      jobType = 'Full-Time',
+      description,
+      requirements = [],
+      requiredBadges = [],
+      minConfidenceScore = 65,
+      minAttendanceRate = 75,
+    } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ success: false, message: 'Job title is required.' });
+    }
+
+    const isDb = mongoose.connection.readyState === 1;
+    let newJob;
+
+    if (isDb) {
+      newJob = await Job.create({
+        title,
+        roleCategory,
+        employerName,
+        openings: Number(openings) || 5,
+        minSalary: Number(minSalary) || 16000,
+        maxSalary: Number(maxSalary) || 20000,
+        location,
+        jobType,
+        description: description || `Hiring for ${title} role.`,
+        requirements: Array.isArray(requirements) ? requirements : [requirements],
+        requiredBadges: Array.isArray(requiredBadges) ? requiredBadges : [requiredBadges],
+        minConfidenceScore: Number(minConfidenceScore) || 65,
+        minAttendanceRate: Number(minAttendanceRate) || 75,
+        status: 'active',
+      });
+    } else {
+      newJob = {
+        _id: 'job-' + Date.now(),
+        title,
+        roleCategory,
+        openings,
+        minSalary,
+        maxSalary,
+        location,
+        jobType,
+        description,
+        requiredBadges,
+        status: 'active',
+      };
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Job vacancy "${title}" posted successfully!`,
+      job: newJob,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 5. PUT Update Job
+exports.updateJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isDb = mongoose.connection.readyState === 1;
+
+    if (isDb && mongoose.Types.ObjectId.isValid(id)) {
+      const updated = await Job.findByIdAndUpdate(
+        id,
+        { $set: req.body },
+        { returnDocument: 'after' }
+      );
+      if (!updated) {
+        return res.status(404).json({ success: false, message: 'Job not found.' });
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'Job updated successfully.',
+        job: updated,
+      });
+    }
+
+    res.status(200).json({ success: true, message: 'Job updated (local mode).' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 6. DELETE / Close Job
+exports.deleteJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isDb = mongoose.connection.readyState === 1;
+
+    if (isDb && mongoose.Types.ObjectId.isValid(id)) {
+      await Job.findByIdAndDelete(id);
+      return res.status(200).json({ success: true, message: 'Job vacancy removed.' });
+    }
+
+    res.status(200).json({ success: true, message: 'Job removed.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 7. GET Matched Candidates for a Specific Job
+exports.getMatchedStudentsForJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isDb = mongoose.connection.readyState === 1;
+
+    let targetJob;
+    if (isDb && mongoose.Types.ObjectId.isValid(id)) {
+      targetJob = await Job.findById(id);
+    }
+    if (!targetJob) {
+      targetJob = DEFAULT_JOBS[0];
+    }
+
+    let learners = [];
+    if (isDb) {
+      learners = await User.find({ role: 'learner' }).select('-password');
+    }
+
+    // Calculate match percentage for every student
+    const scoredStudents = learners.map((l) => {
+      const doc = l.toObject();
+      const match = calculateMatchScore(doc, targetJob);
+      return {
+        ...doc,
+        ...match,
+      };
+    });
+
+    // Sort by match percentage descending
+    scoredStudents.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+    res.status(200).json({
+      success: true,
+      job: targetJob,
+      count: scoredStudents.length,
+      matchedStudents: scoredStudents,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 8. View Graduate Profiles & Candidate Search
 exports.getGraduates = async (req, res) => {
   try {
-    const { search, center, badge, minScore, status } = req.query;
+    const { search, center, badge, minScore, status, jobId } = req.query;
     const isDb = mongoose.connection.readyState === 1;
 
     let query = { role: 'learner' };
@@ -127,23 +474,52 @@ exports.getGraduates = async (req, res) => {
     let graduates = [];
 
     if (isDb) {
-      const learners = await User.find(query).select('-password').sort({ 'softSkillsProfile.confidenceScore': -1 });
+      const learners = await User.find(query)
+        .select('-password')
+        .sort({ 'softSkillsProfile.confidenceScore': -1 });
 
       // Fetch active pipeline to know shortlisted/interview status
       const pipelineEntries = await Pipeline.find();
       const pipelineMap = {};
+      const pipelineRoleMap = {};
       pipelineEntries.forEach((p) => {
         pipelineMap[p.candidateId.toString()] = p.stage;
+        pipelineRoleMap[p.candidateId.toString()] = p.roleApplied;
       });
+
+      // Optionally compute matching against a selected job
+      let targetJob = null;
+      if (jobId && mongoose.Types.ObjectId.isValid(jobId)) {
+        targetJob = await Job.findById(jobId);
+      }
 
       graduates = learners.map((l) => {
         const doc = l.toObject();
         doc.pipelineStage = pipelineMap[l._id.toString()] || 'available';
+        doc.pipelineRole = pipelineRoleMap[l._id.toString()] || '';
+
+        if (targetJob) {
+          const match = calculateMatchScore(doc, targetJob);
+          doc.matchPercentage = match.matchPercentage;
+          doc.matchReasons = match.matchReasons;
+        } else {
+          // Default match against general retail associate
+          const defaultJob = DEFAULT_JOBS[0];
+          const match = calculateMatchScore(doc, defaultJob);
+          doc.matchPercentage = match.matchPercentage;
+          doc.matchReasons = match.matchReasons;
+        }
+
         return doc;
       });
 
       if (status && status !== 'all') {
         graduates = graduates.filter((g) => g.pipelineStage === status);
+      }
+
+      // If matching against a job, sort by match score
+      if (jobId) {
+        graduates.sort((a, b) => (b.matchPercentage || 0) - (a.matchPercentage || 0));
       }
     }
 
@@ -157,7 +533,7 @@ exports.getGraduates = async (req, res) => {
   }
 };
 
-// 4. Candidate Deep Profile (Badges, Assessments & Trainer Endorsements)
+// 9. Candidate Deep Profile (Badges, Attendance, Assessments & Endorsements)
 exports.getCandidateDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -175,6 +551,9 @@ exports.getCandidateDetails = async (req, res) => {
     // Fetch assessment history
     const assessments = await Assessment.find({ studentId: id }).sort({ createdAt: -1 });
 
+    // Fetch attendance records from database
+    const attendanceRecords = await Attendance.find({ studentId: id }).sort({ date: -1 }).limit(10);
+
     // Fetch pipeline status if exists
     const pipeline = await Pipeline.findOne({ candidateId: id });
 
@@ -182,16 +561,17 @@ exports.getCandidateDetails = async (req, res) => {
       success: true,
       candidate,
       assessments,
+      attendanceRecords,
       pipeline,
       trainerEndorsements: [
         {
           trainerName: 'Sunita Sharma',
-          role: 'Lead Soft Skills Faculty',
-          date: '2026-03-10',
+          role: 'Lead Soft Skills Faculty & Placement Mentor',
+          date: '2026-03-12',
           remark:
             candidate.softSkillsProfile?.trainerNotes ||
-            'Strong customer interaction skills, polite spoken English, and high punctuality.',
-          recommendedRoles: ['Customer Service Associate', 'Cashier', 'Front Desk Assistant'],
+            'Strong interpersonal communication, customer-centric attitude, high attendance and grooming standards.',
+          recommendedRoles: ['Customer Sales Associate', 'Cashier & Billing', 'Front Desk Assistant'],
         },
       ],
     });
@@ -200,7 +580,7 @@ exports.getCandidateDetails = async (req, res) => {
   }
 };
 
-// 5. Get Hiring Pipeline
+// 10. Get Hiring Pipeline
 exports.getPipeline = async (req, res) => {
   try {
     const isDb = mongoose.connection.readyState === 1;
@@ -220,10 +600,16 @@ exports.getPipeline = async (req, res) => {
   }
 };
 
-// 6. Shortlist Candidate / Add to Hiring Pipeline
+// 11. Shortlist Candidate / Add to Hiring Pipeline
 exports.addToPipeline = async (req, res) => {
   try {
-    const { candidateId, roleApplied = 'Frontline Customer Associate', notes, offeredSalary = 16500 } = req.body;
+    const {
+      candidateId,
+      roleApplied = 'Customer Sales Associate',
+      notes,
+      offeredSalary = 16500,
+      employerName = 'Apex Retail Partners',
+    } = req.body;
 
     if (!candidateId) {
       return res.status(400).json({ success: false, message: 'Candidate ID is required.' });
@@ -243,6 +629,7 @@ exports.addToPipeline = async (req, res) => {
       if (existing) {
         existing.stage = 'shortlisted';
         existing.roleApplied = roleApplied;
+        existing.employerName = employerName;
         if (notes) existing.notes = notes;
         await existing.save();
         entry = existing;
@@ -250,9 +637,10 @@ exports.addToPipeline = async (req, res) => {
         entry = await Pipeline.create({
           candidateId,
           candidateName: candidate.name,
+          employerName,
           roleApplied,
           stage: 'shortlisted',
-          notes: notes || 'Shortlisted from ETASHA Graduate Talent Pool.',
+          notes: notes || `Candidate shortlisted for ${roleApplied} role based on soft skills profile.`,
           offeredSalary: Number(offeredSalary) || 16500,
           center: candidate.center || 'Sangam Vihar CDC',
           batch: candidate.batch || 'Batch 2026-A',
@@ -262,7 +650,7 @@ exports.addToPipeline = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Candidate shortlisted into hiring pipeline.`,
+      message: `Candidate shortlisted into hiring pipeline for "${roleApplied}".`,
       pipelineEntry: entry,
     });
   } catch (error) {
@@ -270,11 +658,19 @@ exports.addToPipeline = async (req, res) => {
   }
 };
 
-// 7. Update Pipeline Stage (Shortlisted -> Interview -> Offered -> Hired -> Rejected)
+// 12. Update Pipeline Stage (Shortlisted -> Interview -> Offered -> Hired -> Rejected)
 exports.updatePipelineStage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { stage, interviewDate, interviewTime, offeredSalary, notes, roleApplied, employerName = 'Apex Retail Solutions' } = req.body;
+    const {
+      stage,
+      interviewDate,
+      interviewTime,
+      offeredSalary,
+      notes,
+      roleApplied,
+      employerName = 'Apex Retail Partners',
+    } = req.body;
 
     const isDb = mongoose.connection.readyState === 1;
 
@@ -285,8 +681,13 @@ exports.updatePipelineStage = async (req, res) => {
       if (offeredSalary) updateData.offeredSalary = Number(offeredSalary);
       if (notes) updateData.notes = notes;
       if (roleApplied) updateData.roleApplied = roleApplied;
+      if (employerName) updateData.employerName = employerName;
 
-      const updated = await Pipeline.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+      const updated = await Pipeline.findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { returnDocument: 'after' }
+      );
 
       if (!updated) {
         return res.status(404).json({ success: false, message: 'Pipeline record not found.' });
@@ -301,9 +702,9 @@ exports.updatePipelineStage = async (req, res) => {
             $set: {
               studentId: updated.candidateId,
               studentName: updated.candidateName,
-              employerName: employerName || updated.employerName || 'Apex Retail Solutions',
-              roleTitle: updated.roleApplied || 'Frontline Customer Associate',
-              sector: 'Retail',
+              employerName: employerName || updated.employerName || 'Apex Retail Partners',
+              roleTitle: updated.roleApplied || 'Customer Sales Associate',
+              sector: 'Retail & Customer Care',
               monthlySalary: updated.offeredSalary || 16500,
               placementDate: new Date().toISOString().split('T')[0],
               center: updated.center || 'Sangam Vihar CDC',
@@ -311,10 +712,10 @@ exports.updatePipelineStage = async (req, res) => {
               status: 'placed',
             },
           },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         );
 
-        // Update learner profile designation
+        // Update learner profile designation in User model
         if (candidate) {
           candidate.designation = `${updated.roleApplied} at ${employerName}`;
           await candidate.save();
@@ -323,14 +724,14 @@ exports.updatePipelineStage = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: `Candidate moved to stage "${stage}".`,
+        message: `Candidate status updated to "${stage.replace('_', ' ').toUpperCase()}".`,
         pipelineEntry: updated,
       });
     }
 
     res.status(200).json({
       success: true,
-      message: `Stage updated to "${stage}" (Local State).`,
+      message: `Stage updated to "${stage}".`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

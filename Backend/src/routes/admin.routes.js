@@ -8,43 +8,49 @@ const {
   deleteUser,
   getCenters,
   createCenter,
+  deleteCenter,
   getCohorts,
   createCohort,
+  deleteCohort,
   getEnrollmentAndAttendance,
   getSkillProgression,
   getPlacements,
   recordPlacement,
+  deletePlacement,
   getImpactReport,
 } = require('../controllers/admin.controller');
 
-// Overview
+// 1. Overview
 router.get('/overview', getAdminOverview);
 
-// User Management
+// 2. User Management
 router.get('/users', getUsers);
 router.post('/users', createUser);
 router.put('/users/:id/role', updateUserRole);
 router.delete('/users/:id', deleteUser);
 
-// Training Centers
+// 3. Training Centers (CDCs)
 router.get('/centers', getCenters);
 router.post('/centers', createCenter);
+router.delete('/centers/:id', deleteCenter);
 
-// Courses & Cohorts
+// 4. Courses & Cohorts
 router.get('/cohorts', getCohorts);
 router.post('/cohorts', createCohort);
+router.delete('/cohorts/:id', deleteCohort);
 
-// Attendance & Enrollment Monitoring
+// 5. Attendance & Enrollment Monitoring
 router.get('/enrollment-attendance', getEnrollmentAndAttendance);
 
-// Skill Progression Analytics
+// 6. Skill Progression Analytics
 router.get('/skill-progression', getSkillProgression);
 
-// Placements
+// 7. Placements
 router.get('/placements', getPlacements);
 router.post('/placements', recordPlacement);
+router.delete('/placements/:id', deletePlacement);
 
-// Impact & CSR Report
+// 8. Impact & CSR Report
 router.get('/impact-report', getImpactReport);
 
 module.exports = router;
