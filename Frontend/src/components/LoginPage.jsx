@@ -1,19 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import {
-  Mail,
-  Lock,
-  User,
-  Phone,
-  Building,
-  MapPin,
-  Eye,
-  EyeOff,
-  LogIn,
-  UserPlus,
-  AlertCircle,
-  CheckCircle2,
-} from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Mail, Phone, Building, MapPin } from 'lucide-react';
 
 export const LoginPage = () => {
   const { login, register, loading, DEMO_PRESETS } = useAuth();
@@ -21,7 +8,7 @@ export const LoginPage = () => {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [role, setRole] = useState('learner');
 
-  // Fields
+  // Form Fields
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -41,7 +28,7 @@ export const LoginPage = () => {
 
     if (mode === 'login') {
       if (!identifier.trim() || !password) {
-        setErrorMsg('Please enter your email or phone number and password.');
+        setErrorMsg('Please enter email or mobile number and password.');
         return;
       }
       const res = await login(identifier.trim(), password, role);
@@ -50,7 +37,7 @@ export const LoginPage = () => {
       }
     } else {
       if (!name.trim() || !password || (!phone.trim() && !email.trim())) {
-        setErrorMsg('Please enter name, password, and phone/email.');
+        setErrorMsg('Please enter name, password, and contact details.');
         return;
       }
       const res = await register({
@@ -82,11 +69,11 @@ export const LoginPage = () => {
   return (
     <div className="auth-card">
       <div className="auth-header">
-        <h2>{mode === 'login' ? 'Sign In to ETASHA' : 'Create an Account'}</h2>
+        <h2>{mode === 'login' ? 'Sign In' : 'Register Account'}</h2>
         <p>
           {mode === 'login'
-            ? 'Access your skills and training portal'
-            : 'Register for ETASHA skill development program'}
+            ? 'Sign in to ETASHA SkillSetu'
+            : 'Create new learner or staff account'}
         </p>
       </div>
 
@@ -116,49 +103,36 @@ export const LoginPage = () => {
         </button>
       </div>
 
-      {/* Messages */}
-      {errorMsg && (
-        <div className="alert alert-error">
-          <AlertCircle size={16} />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-      {successMsg && (
-        <div className="alert alert-success">
-          <CheckCircle2 size={16} />
-          <span>{successMsg}</span>
-        </div>
-      )}
+      {/* Status Messages */}
+      {errorMsg && <div className="alert alert-error">{errorMsg}</div>}
+      {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <form onSubmit={handleSubmit}>
         {/* Role Selector */}
         <div className="form-group">
-          <label className="form-label">Select Role</label>
-          <div className="input-wrapper">
-            <select
-              className="form-select"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="learner">Learner / Trainee</option>
-              <option value="trainer">Trainer / Facilitator</option>
-              <option value="employer">Employer Partner</option>
-              <option value="admin">Impact & Leadership (Admin)</option>
-            </select>
-          </div>
+          <label className="form-label">Role</label>
+          <select
+            className="form-select"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="learner">Learner / Trainee</option>
+            <option value="trainer">Trainer / Facilitator</option>
+            <option value="employer">Employer Partner</option>
+            <option value="admin">Impact & Leadership (Admin)</option>
+          </select>
         </div>
 
         {mode === 'register' && (
           <>
-            {/* Full Name */}
             <div className="form-group">
               <label className="form-label">Full Name</label>
               <div className="input-wrapper">
-                <User size={16} className="input-icon" />
+                <User size={15} className="input-icon" />
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Enter your full name"
+                  placeholder="Full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -166,11 +140,10 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            {/* CDC Center */}
             <div className="form-group">
               <label className="form-label">Training Center (CDC)</label>
               <div className="input-wrapper">
-                <MapPin size={16} className="input-icon" />
+                <MapPin size={15} className="input-icon" />
                 <select
                   className="form-select"
                   value={center}
@@ -190,11 +163,11 @@ export const LoginPage = () => {
               <div className="form-group">
                 <label className="form-label">Company / Organization</label>
                 <div className="input-wrapper">
-                  <Building size={16} className="input-icon" />
+                  <Building size={15} className="input-icon" />
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Enter company name"
+                    placeholder="Organization name"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                   />
@@ -211,17 +184,15 @@ export const LoginPage = () => {
           </label>
           <div className="input-wrapper">
             {mode === 'login' ? (
-              <Mail size={16} className="input-icon" />
+              <Mail size={15} className="input-icon" />
             ) : (
-              <Phone size={16} className="input-icon" />
+              <Phone size={15} className="input-icon" />
             )}
             <input
               type="text"
               className="form-input"
               placeholder={
-                mode === 'login'
-                  ? 'e.g. 9876543210 or user@etasha.org'
-                  : 'Enter 10-digit mobile or email'
+                mode === 'login' ? 'e.g. 9876543210 or user@etasha.org' : 'Mobile number or email'
               }
               value={mode === 'login' ? identifier : phone || email}
               onChange={(e) => {
@@ -245,11 +216,11 @@ export const LoginPage = () => {
         <div className="form-group">
           <label className="form-label">Password</label>
           <div className="input-wrapper">
-            <Lock size={16} className="input-icon" />
+            <Lock size={15} className="input-icon" />
             <input
               type={showPassword ? 'text' : 'password'}
               className="form-input"
-              placeholder="Enter your password"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -260,31 +231,19 @@ export const LoginPage = () => {
               className="btn-toggle-eye"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
         </div>
 
         <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? (
-            <span>Processing...</span>
-          ) : mode === 'login' ? (
-            <>
-              <LogIn size={16} />
-              <span>Sign In</span>
-            </>
-          ) : (
-            <>
-              <UserPlus size={16} />
-              <span>Create Account</span>
-            </>
-          )}
+          {loading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
       </form>
 
-      {/* Demo Credentials Section */}
+      {/* Demo Credentials */}
       <div className="demo-section">
-        <div className="demo-title">One-Click Demo Login</div>
+        <div className="demo-title">Demo Accounts</div>
         <div className="demo-buttons">
           <button
             type="button"

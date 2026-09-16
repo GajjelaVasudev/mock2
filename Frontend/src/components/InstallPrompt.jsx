@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Download, X } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 
 export const InstallPrompt = ({
   deferredPrompt,
@@ -13,13 +13,12 @@ export const InstallPrompt = ({
   return (
     <div className="install-banner">
       <div className="install-banner-text">
-        <Smartphone size={18} color="#2563EB" />
-        <span>Install ETASHA PWA on your device for fast, offline access</span>
+        <span>Install ETASHA application for offline access</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         {deferredPrompt && (
           <button className="btn-pwa-install" onClick={handleInstallClick}>
-            <Download size={13} />
+            <Download size={12} />
             <span>Install</span>
           </button>
         )}
@@ -28,13 +27,13 @@ export const InstallPrompt = ({
           style={{
             background: 'transparent',
             border: 'none',
-            color: '#64748B',
+            color: '#6B7280',
             cursor: 'pointer',
             padding: '2px',
           }}
           title="Dismiss"
         >
-          <X size={15} />
+          <X size={14} />
         </button>
       </div>
     </div>

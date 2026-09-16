@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Sparkles } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 export const Navbar = ({ deferredPrompt, isInstalled, handleInstallClick }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -20,9 +20,7 @@ export const Navbar = ({ deferredPrompt, isInstalled, handleInstallClick }) => {
   return (
     <nav className="navbar">
       <a href="/" className="nav-brand">
-        <div className="brand-icon">
-          <Sparkles size={20} />
-        </div>
+        <div className="brand-icon">E</div>
         <div className="brand-title">
           <h1>ETASHA Society</h1>
           <span>SkillSetu Platform</span>
@@ -37,7 +35,7 @@ export const Navbar = ({ deferredPrompt, isInstalled, handleInstallClick }) => {
 
         {deferredPrompt && !isInstalled && (
           <button className="btn-pwa-install" onClick={handleInstallClick}>
-            <Download size={14} />
+            <Download size={13} />
             <span>Install App</span>
           </button>
         )}

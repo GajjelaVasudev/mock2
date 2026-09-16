@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { InstallPrompt } from './components/InstallPrompt';
 import { LoginPage } from './components/LoginPage';
 import { DashboardPreview } from './components/DashboardPreview';
+import { TrainerDashboard } from './components/TrainerDashboard';
 
 export function App() {
   const { user } = useAuth();
@@ -84,9 +85,15 @@ export function App() {
         dismissed={promptDismissed}
       />
 
-      {/* Main Login or Dashboard */}
+      {/* Main View Router */}
       <main className="main-wrapper">
-        {user ? <DashboardPreview /> : <LoginPage />}
+        {!user ? (
+          <LoginPage />
+        ) : user.role === 'trainer' ? (
+          <TrainerDashboard />
+        ) : (
+          <DashboardPreview />
+        )}
       </main>
 
       {/* Footer */}

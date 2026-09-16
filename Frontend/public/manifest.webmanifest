@@ -1,12 +1,12 @@
 {
   "name": "ETASHA SkillSetu",
   "short_name": "ETASHA",
-  "description": "ETASHA Society Soft Skills & Career Readiness Progressive Web App",
+  "description": "ETASHA Society Soft Skills and Career Readiness Progressive Web App",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#FFFFFF",
-  "theme_color": "#2563EB",
+  "theme_color": "#000000",
   "categories": ["education", "career", "productivity"],
   "icons": [
     {
