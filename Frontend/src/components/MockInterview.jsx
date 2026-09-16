@@ -25,6 +25,7 @@ export function MockInterview({ question }) {
     const [status, setStatus] = useState('idle'); // idle | recording | listening | processing | done | error
     const [result, setResult] = useState(null);
     const [errorMsg, setErrorMsg] = useState('');
+    const [audioUrl, setAudioUrl] = useState(null);
 
     const mediaRecorderRef = useRef(null);
     const chunksRef = useRef([]);
@@ -41,7 +42,7 @@ export function MockInterview({ question }) {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Evaluation failed');
+            if (!response.ok) throw new Error(data.error || data.message || 'Evaluation failed');
 
             setResult(data.evaluation);
             setStatus('done');
@@ -73,6 +74,11 @@ export function MockInterview({ question }) {
             recorder.onstop = async () => {
                 stream.getTracks().forEach((t) => t.stop());
                 const blob = new Blob(chunksRef.current, { type: mimeType });
+                
+                // Add the audio URL so the user can listen to it
+                const url = URL.createObjectURL(blob);
+                setAudioUrl(url);
+
                 const base64 = await blobToBase64(blob);
                 await submitToServer({ audio_base64: base64, audio_mime_type: mimeType });
             };
@@ -164,13 +170,50 @@ export function MockInterview({ question }) {
 
             {status === 'error' && <p className="error-text">{errorMsg}</p>}
 
+            {audioUrl && (
+                <div style={{ marginTop: '15px' }}>
+                    <p>Your recorded answer:</p>
+                    <audio controls src={audioUrl} style={{ width: '100%' }}></audio>
+                </div>
+            )}
+
             {status === 'done' && result && (
                 <div className="result-box">
-                    <p>Communication: {result.communication_score}/100</p>
-                    <p>Confidence: {result.confidence_score}/100</p>
-                    <p>Relevance: {result.relevance_score}/100</p>
-                    <p>Grammar: {result.grammar_score}/100</p>
-                    <p className="feedback-text">{result.feedback}</p>
+                    <h3>Scores</h3>
+                    <p>Communication: {result.scores?.communication || 0}/10</p>
+                    <p>Confidence: {result.scores?.confidence || 0}/10</p>
+                    <p>Relevance: {result.scores?.relevance || 0}/10</p>
+                    <p>Grammar: {result.scores?.grammar || 0}/10</p>
+                    
+                    <h3>Feedback</h3>
+                    {result.feedback && (
+                        <div className="feedback-text">
+                            {result.feedback.strengths && result.feedback.strengths.length > 0 && (
+                                <>
+                                    <strong>Strengths:</strong>
+                                    <ul>
+                                        {result.feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                                    </ul>
+                                </>
+                            )}
+                            {result.feedback.weaknesses && result.feedback.weaknesses.length > 0 && (
+                                <>
+                                    <strong>Areas for Improvement:</strong>
+                                    <ul>
+                                        {result.feedback.weaknesses.map((s, i) => <li key={i}>{s}</li>)}
+                                    </ul>
+                                </>
+                            )}
+                            {result.feedback.recommendations && result.feedback.recommendations.length > 0 && (
+                                <>
+                                    <strong>Recommendations:</strong>
+                                    <ul>
+                                        {result.feedback.recommendations.map((s, i) => <li key={i}>{s}</li>)}
+                                    </ul>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
