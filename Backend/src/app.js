@@ -5,6 +5,8 @@ const cors = require('cors');
 const trainerRoutes = require('./routes/trainer.routes');
 const adminRoutes = require('./routes/admin.routes');
 const employerRoutes = require('./routes/employer.routes');
+const aiRoutes = require('./routes/ai.routes');
+
 
 const app = express();
 const authRoutes = require('./routes/auth.routes');
@@ -38,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/learners', studentRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/self-assessments', assessmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
