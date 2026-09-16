@@ -6,6 +6,8 @@ const trainerRoutes = require('./routes/trainer.routes');
 const adminRoutes = require('./routes/admin.routes');
 const employerRoutes = require('./routes/employer.routes');
 const aiRoutes = require('./routes/ai.routes');
+const mentorshipRoutes = require('./routes/mentorship.routes');
+
 
 
 const app = express();
@@ -35,6 +37,7 @@ app.use(cookieParser());
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/employer', employerRoutes);
+app.use('/api', mentorshipRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/learners', studentRoutes);
