@@ -8,5 +8,6 @@ router.get('/posts', authenticate, requireRole('student', 'alumni'), communityCo
 router.post('/posts', authenticate, requireRole('student', 'alumni'), communityController.createPost);
 router.get('/posts/:id/replies', authenticate, requireRole('student', 'alumni'), communityController.getReplies);
 router.post('/posts/:id/replies', authenticate, requireRole('student', 'alumni'), communityController.createReply);
+router.get('/success-stories', authenticate, communityController.getSuccessStories);
 
 module.exports = router;

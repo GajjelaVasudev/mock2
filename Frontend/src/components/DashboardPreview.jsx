@@ -62,7 +62,13 @@ export const DashboardPreview = () => {
           <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Soft Skills Developmental Status
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+            <div className="info-item">
+              <div className="info-label">Attendance</div>
+              <div className="info-val" style={{ color: (profile.attendanceRate || 85) < 75 ? '#DC2626' : '#16A34A', fontWeight: 700 }}>
+                {profile.attendanceRate !== undefined ? profile.attendanceRate : 85}%
+              </div>
+            </div>
             <div className="info-item">
               <div className="info-label">Confidence</div>
               <div className="info-val">{profile.confidenceScore}%</div>
@@ -76,7 +82,7 @@ export const DashboardPreview = () => {
               <div className="info-val">{profile.workplaceEtiquetteScore}%</div>
             </div>
             <div className="info-item">
-              <div className="info-label">Interview Readiness</div>
+              <div className="info-label">Interview Ready</div>
               <div className="info-val">{profile.interviewReadinessScore}%</div>
             </div>
           </div>
