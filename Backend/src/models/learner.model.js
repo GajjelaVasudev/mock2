@@ -19,7 +19,30 @@ const LearnerSchema = new mongoose.Schema({
         type: String,
         enum: ['in-training', 'seeking', 'placed'],
         default: 'in-training'
-    }
+    },// Add these fields to the existing LearnerSchema in src/models/learner.model.js
+isMentor: {
+    type: Boolean,
+    default: false
+},
+mentorBio: {
+    type: String,
+    trim: true
+},
+placedCompany: {
+    type: String,
+    trim: true
+},
+placedRole: {
+    type: String,
+    trim: true
+},
+placedDate: {
+    type: Date
+},
+isAlumni: {
+    type: Boolean,
+    default: false
+}
 }, { timestamps: true });
 
 module.exports = mongoose.model('learner', LearnerSchema);

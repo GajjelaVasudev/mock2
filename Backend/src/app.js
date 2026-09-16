@@ -5,12 +5,17 @@ const cors = require('cors');
 const trainerRoutes = require('./routes/trainer.routes');
 const adminRoutes = require('./routes/admin.routes');
 const employerRoutes = require('./routes/employer.routes');
+const aiRoutes = require('./routes/ai.routes');
+const mentorshipRoutes = require('./routes/mentorship.routes');
+
+
 
 const app = express();
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/student.routes');
 const contentRoutes = require('./routes/content.routes');
 const assessmentRoutes = require('./routes/assesment.routes');
+const communityRoutes = require('./routes/community.routes');
 
 // Middleware
 app.use(
@@ -33,9 +38,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/employer', employerRoutes);
+app.use('/api', mentorshipRoutes);
+app.use('/api/community', communityRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/learners', studentRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/self-assessments', assessmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -48,7 +57,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 Handler
+// 404 Handler — must be last, after every route
 app.use((req, res) => {
   res.status(404).json({
     success: false,
