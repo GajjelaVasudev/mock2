@@ -50,6 +50,10 @@ class MCPClientWrapper {
             });
             // The result is typically an array of content blocks.
             // We expect the first block to be text containing the JSON response.
+            if (result?.isError) {
+                const errorText = result.content?.find((block) => block.type === "text")?.text || "AI tool failed";
+                throw new Error(errorText);
+            }
             if (result && result.content && result.content.length > 0) {
                 const textContent = result.content[0].text;
                 try {
