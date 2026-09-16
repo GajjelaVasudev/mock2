@@ -38,6 +38,10 @@ placedRole: {
 },
 placedDate: {
     type: Date
+},
+isAlumni: {
+    type: Boolean,
+    default: false
 }
 }, { timestamps: true });
 
