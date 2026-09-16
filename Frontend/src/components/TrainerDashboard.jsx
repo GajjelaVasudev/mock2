@@ -92,11 +92,7 @@ export const TrainerDashboard = () => {
             setSelectedStudentId(stData.students[0]._id || stData.students[0].id);
             setTaskStudentId(stData.students[0]._id || stData.students[0].id);
           }
-          const initAtt = {};
-          stData.students.forEach((s) => {
-            initAtt[s._id || s.id] = 'present';
-          });
-          setAttendanceRecords(initAtt);
+          await fetchAttendanceForDate(attendanceDate, stData.students);
         }
       }
 
@@ -116,9 +112,42 @@ export const TrainerDashboard = () => {
     }
   };
 
+  const fetchAttendanceForDate = async (targetDate, studentList = students) => {
+    if (!targetDate) return;
+    try {
+      const res = await fetch(`/api/trainer/attendance?date=${targetDate}`);
+      const initialMap = {};
+      if (studentList && studentList.length > 0) {
+        studentList.forEach((s) => {
+          const id = s._id || s.id;
+          initialMap[id] = 'present';
+        });
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.records && Array.isArray(data.records) && data.records.length > 0) {
+          data.records.forEach((r) => {
+            if (r.studentId) {
+              initialMap[r.studentId] = r.status || 'present';
+            }
+          });
+        }
+      }
+
+      setAttendanceRecords(initialMap);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchAttendanceForDate(attendanceDate);
+  }, [attendanceDate]);
 
   const handleAttendanceChange = (studentId, status) => {
     setAttendanceRecords((prev) => ({

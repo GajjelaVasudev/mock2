@@ -28,7 +28,7 @@ async function updateMyProfile(req, res) {
         .findOneAndUpdate(
             { user: req.user.id },
             { $set: learnerUpdates },
-            { new: true }
+            { returnDocument: 'after' }
         )
         .populate('user', 'username email role phoneNumber');
 

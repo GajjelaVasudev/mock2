@@ -182,6 +182,8 @@ export const AdminDashboard = () => {
         setNewUserEmail('');
         setNewUserPhone('');
         fetchAdminData();
+      } else {
+        showNotification(data.message || 'Error creating user.');
       }
     } catch (err) {
       showNotification('Error creating user.');
@@ -242,7 +244,21 @@ export const AdminDashboard = () => {
     }
   };
 
-  // 5. Create Cohort
+  // 5. Delete Center
+  const handleDeleteCenter = async (centerId, name) => {
+    if (!confirm(`Are you sure you want to remove center "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/centers/${centerId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showNotification(`Center "${name}" removed.`);
+        fetchAdminData();
+      }
+    } catch (err) {
+      showNotification('Error removing center.');
+    }
+  };
+
+  // 6. Create Cohort
   const handleCreateCohort = async (e) => {
     e.preventDefault();
     if (!newCohortName.trim()) return;
@@ -268,7 +284,21 @@ export const AdminDashboard = () => {
     }
   };
 
-  // 6. Record Placement
+  // 7. Delete Cohort
+  const handleDeleteCohort = async (cohortId, name) => {
+    if (!confirm(`Are you sure you want to remove cohort "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/cohorts/${cohortId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showNotification(`Cohort "${name}" removed.`);
+        fetchAdminData();
+      }
+    } catch (err) {
+      showNotification('Error removing cohort.');
+    }
+  };
+
+  // 8. Record Placement
   const handleRecordPlacement = async (e) => {
     e.preventDefault();
     if (!placeStudentName.trim() || !placeEmployer.trim()) return;
@@ -293,6 +323,20 @@ export const AdminDashboard = () => {
       }
     } catch (err) {
       showNotification('Error recording placement.');
+    }
+  };
+
+  // 9. Delete Placement
+  const handleDeletePlacement = async (placementId, studentName) => {
+    if (!confirm(`Are you sure you want to remove placement record for "${studentName}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/placements/${placementId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showNotification(`Placement record removed.`);
+        fetchAdminData();
+      }
+    } catch (err) {
+      showNotification('Error removing placement record.');
     }
   };
 
@@ -643,19 +687,34 @@ export const AdminDashboard = () => {
             <p className="panel-sub">Ground-level training delivery locations across Delhi and NCR</p>
 
             <div className="tasks-stack" style={{ marginTop: '0.85rem' }}>
-              {centersList.map((c) => (
-                <div key={c._id || c.id || c.name} className="task-item-card">
-                  <div className="task-item-header">
-                    <strong>{c.name}</strong>
-                    <span className="task-category-tag">Capacity: {c.capacity}</span>
+              {centersList.map((c) => {
+                const cId = c._id || c.id;
+                return (
+                  <div key={cId || c.name} className="task-item-card">
+                    <div className="task-item-header">
+                      <strong>{c.name}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="task-category-tag">Capacity: {c.capacity}</span>
+                        {cId && (
+                          <button
+                            style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '2px' }}
+                            onClick={() => handleDeleteCenter(cId, c.name)}
+                            title="Remove center"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="task-desc-text">{c.address || c.location}</p>
+                    <div className="task-item-footer">
+                      <span>Lead Facilitator: {c.leadTrainer}</span>
+                      <span>Enrolled: <strong>{c.enrolledLearners !== undefined ? c.enrolledLearners : 0} Trainees</strong></span>
+                      <span>Batches: <strong>{c.activeBatchesCount || 1}</strong></span>
+                    </div>
                   </div>
-                  <p className="task-desc-text">{c.address || c.location}</p>
-                  <div className="task-item-footer">
-                    <span>Lead Facilitator: {c.leadTrainer}</span>
-                    <span>Contact: {c.contactPhone || 'N/A'}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -726,19 +785,34 @@ export const AdminDashboard = () => {
             <p className="panel-sub">Structured short-term soft skills & domain readiness cohorts</p>
 
             <div className="tasks-stack" style={{ marginTop: '0.85rem' }}>
-              {cohortsList.map((co) => (
-                <div key={co._id || co.id || co.name} className="task-item-card">
-                  <div className="task-item-header">
-                    <strong>{co.name}</strong>
-                    <span className="task-category-tag">{co.status}</span>
+              {cohortsList.map((co) => {
+                const coId = co._id || co.id;
+                return (
+                  <div key={coId || co.name} className="task-item-card">
+                    <div className="task-item-header">
+                      <strong>{co.name}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="task-category-tag">{co.status || 'active'}</span>
+                        {coId && (
+                          <button
+                            style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '2px' }}
+                            onClick={() => handleDeleteCohort(coId, co.name)}
+                            title="Remove cohort"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="task-desc-text"><strong>Course:</strong> {co.courseName}</p>
+                    <div className="task-item-footer">
+                      <span>Center: {co.center}</span>
+                      <span>Trainer: {co.trainerName}</span>
+                      <span>Enrolled: <strong>{co.enrolledCount !== undefined ? co.enrolledCount : 0}</strong></span>
+                    </div>
                   </div>
-                  <p className="task-desc-text"><strong>Course:</strong> {co.courseName}</p>
-                  <div className="task-item-footer">
-                    <span>Center: {co.center}</span>
-                    <span>Trainer: {co.trainerName}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -780,10 +854,20 @@ export const AdminDashboard = () => {
                   value={newCohortCenter}
                   onChange={(e) => setNewCohortCenter(e.target.value)}
                 >
-                  <option value="Sangam Vihar CDC">Sangam Vihar CDC</option>
-                  <option value="Khanpur CDC">Khanpur CDC</option>
-                  <option value="Dakshinpuri CDC">Dakshinpuri CDC</option>
-                  <option value="Mangolpuri CDC">Mangolpuri CDC</option>
+                  {centersList.length > 0 ? (
+                    centersList.map((c) => (
+                      <option key={c._id || c.name} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Sangam Vihar CDC">Sangam Vihar CDC</option>
+                      <option value="Khanpur CDC">Khanpur CDC</option>
+                      <option value="Dakshinpuri CDC">Dakshinpuri CDC</option>
+                      <option value="Mangolpuri CDC">Mangolpuri CDC</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -903,18 +987,18 @@ export const AdminDashboard = () => {
                 <div className="at-risk-header">
                   <div>
                     <h4>{st.name}</h4>
-                    <span className="at-risk-meta">{st.center} • {st.batch}</span>
+                    <span className="at-risk-meta">{st.center || 'Sangam Vihar CDC'} • {st.batch || 'Batch 2026-A'}</span>
                   </div>
                   <span className="risk-indicator-pill">Dropout Risk</span>
                 </div>
 
                 <div className="risk-reason-box">
                   <strong>Risk Trigger:</strong>
-                  <p>Attendance is {st.softSkillsProfile?.attendanceRate || 68}% (Below 75% threshold)</p>
+                  <p>Attendance is {st.softSkillsProfile?.attendanceRate !== undefined ? st.softSkillsProfile.attendanceRate : 68}% (Below 75% threshold)</p>
                 </div>
 
                 <div className="risk-metrics-row">
-                  <div><span>Attendance: </span><strong>{st.softSkillsProfile?.attendanceRate || 68}%</strong></div>
+                  <div><span>Attendance: </span><strong>{st.softSkillsProfile?.attendanceRate !== undefined ? st.softSkillsProfile.attendanceRate : 68}%</strong></div>
                   <div><span>Confidence: </span><strong>{st.softSkillsProfile?.confidenceScore || 52}%</strong></div>
                   <div><span>Contact: </span><strong>{st.phone || 'N/A'}</strong></div>
                 </div>
@@ -941,20 +1025,35 @@ export const AdminDashboard = () => {
                     <th>Employer & Role</th>
                     <th>Sector</th>
                     <th>Monthly Salary</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {placementsList.map((p) => (
-                    <tr key={p._id || p.id || p.studentName}>
-                      <td><strong>{p.studentName}</strong></td>
-                      <td>
-                        <div>{p.employerName}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#6B7280' }}>{p.roleTitle}</div>
-                      </td>
-                      <td>{p.sector}</td>
-                      <td><strong>INR {p.monthlySalary.toLocaleString()}/mo</strong></td>
-                    </tr>
-                  ))}
+                  {placementsList.map((p) => {
+                    const pId = p._id || p.id;
+                    return (
+                      <tr key={pId || p.studentName}>
+                        <td><strong>{p.studentName}</strong></td>
+                        <td>
+                          <div>{p.employerName}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#6B7280' }}>{p.roleTitle}</div>
+                        </td>
+                        <td>{p.sector}</td>
+                        <td><strong>INR {p.monthlySalary ? p.monthlySalary.toLocaleString() : 'N/A'}/mo</strong></td>
+                        <td>
+                          {pId && (
+                            <button
+                              style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                              onClick={() => handleDeletePlacement(pId, p.studentName)}
+                              title="Remove placement"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1044,10 +1143,27 @@ export const AdminDashboard = () => {
               <p className="panel-sub">{impactReport.organization} • Generated: {impactReport.generatedDate}</p>
             </div>
 
-            <button className="btn-secondary-sm" onClick={() => window.print()}>
-              <Printer size={14} />
-              <span>Print / Export PDF</span>
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn-secondary-sm"
+                onClick={() => {
+                  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(impactReport, null, 2));
+                  const downloadAnchor = document.createElement('a');
+                  downloadAnchor.setAttribute('href', dataStr);
+                  downloadAnchor.setAttribute('download', `ETASHA_CSR_Report_${new Date().toISOString().slice(0,10)}.json`);
+                  document.body.appendChild(downloadAnchor);
+                  downloadAnchor.click();
+                  downloadAnchor.remove();
+                }}
+              >
+                <Download size={14} />
+                <span>Export JSON</span>
+              </button>
+              <button className="btn-secondary-sm" onClick={() => window.print()}>
+                <Printer size={14} />
+                <span>Print / PDF</span>
+              </button>
+            </div>
           </div>
 
           <div style={{ backgroundColor: '#F3F4F6', padding: '1.25rem', borderRadius: '6px', marginTop: '1rem', border: '1px solid #E5E7EB' }}>

@@ -7,7 +7,7 @@ const adminRoutes = require('./routes/admin.routes');
 const employerRoutes = require('./routes/employer.routes');
 
 const app = express();
-const authRoutes = require('./routes/auth.routes');
+const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/student.routes');
 const contentRoutes = require('./routes/content.routes');
 const assessmentRoutes = require('./routes/assesment.routes');
@@ -29,9 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/employer', employerRoutes);
+app.use('/api/learners', studentRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/self-assessments', assessmentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -51,10 +55,6 @@ app.use((req, res) => {
     message: `Endpoint ${req.originalUrl} not found`,
   });
 });
-app.use('/api/auth', authRoutes);
-app.use('/api/learners', studentRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/self-assessments', assessmentRoutes);
 
 // Error Handler
 app.use((err, req, res, next) => {

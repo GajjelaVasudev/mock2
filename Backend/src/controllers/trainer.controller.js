@@ -161,41 +161,37 @@ let inMemoryTasks = [
 let inMemoryAttendance = {};
 
 async function getAllCohortStudents() {
-  let combined = [...inMemoryStudents];
   const isDb = mongoose.connection.readyState === 1;
 
   if (isDb) {
     try {
       const dbStudents = await User.find({ role: 'learner' }).select('-password');
-      dbStudents.forEach((dbS) => {
-        const obj = dbS.toObject();
-        const existingIdx = combined.findIndex(
-          (c) => c.email === obj.email || c.phone === obj.phone || c._id === obj._id.toString()
-        );
-        const att = obj.softSkillsProfile?.attendanceRate || 85;
-        const conf = obj.softSkillsProfile?.confidenceScore || 65;
-        const isRisk = att < 75 || conf < 60;
+      if (dbStudents.length > 0) {
+        return dbStudents.map((dbS) => {
+          const obj = dbS.toObject();
+          const att =
+            obj.softSkillsProfile?.attendanceRate !== undefined
+              ? obj.softSkillsProfile.attendanceRate
+              : 85;
+          const conf = obj.softSkillsProfile?.confidenceScore || 65;
+          const isRisk = att < 75 || conf < 60;
 
-        const formatted = {
-          ...obj,
-          id: obj._id.toString(),
-          attendanceRate: att,
-          atRisk: isRisk,
-          riskReason: isRisk ? `Low attendance (${att}%) or confidence (${conf}%)` : '',
-        };
-
-        if (existingIdx >= 0) {
-          combined[existingIdx] = formatted;
-        } else {
-          combined.unshift(formatted);
-        }
-      });
+          return {
+            ...obj,
+            id: obj._id.toString(),
+            _id: obj._id.toString(),
+            attendanceRate: att,
+            atRisk: isRisk,
+            riskReason: isRisk ? `Low attendance (${att}%) or confidence (${conf}%)` : '',
+          };
+        });
+      }
     } catch (e) {
       console.warn('Error querying db students:', e.message);
     }
   }
 
-  return combined;
+  return inMemoryStudents;
 }
 
 // 1. GET Overview / KPIs
@@ -281,12 +277,18 @@ exports.recordAttendance = async (req, res) => {
 
     inMemoryAttendance[date] = records;
 
-    records.forEach((rec) => {
-      const target = inMemoryStudents.find((s) => (s._id || s.id) === rec.studentId);
+    const isDb = mongoose.connection.readyState === 1;
+
+    for (const rec of records) {
+      const stId = rec.studentId;
+      const status = rec.status || 'present';
+
+      // 1. Update in-memory fallback list
+      const target = inMemoryStudents.find((s) => (s._id || s.id) === stId);
       if (target) {
-        if (rec.status === 'absent') {
+        if (status === 'absent') {
           target.attendanceRate = Math.max(50, (target.attendanceRate || 85) - 3);
-        } else if (rec.status === 'present') {
+        } else if (status === 'present') {
           target.attendanceRate = Math.min(100, (target.attendanceRate || 85) + 1);
         }
         target.atRisk = target.attendanceRate < 75;
@@ -294,38 +296,57 @@ exports.recordAttendance = async (req, res) => {
           target.riskReason = `Attendance dropped to ${target.attendanceRate}%`;
         }
       }
-    });
 
-    const isDb = mongoose.connection.readyState === 1;
-    if (isDb) {
-      for (const rec of records) {
+      // 2. Persist to MongoDB
+      if (isDb) {
         try {
-          if (mongoose.Types.ObjectId.isValid(rec.studentId)) {
-            await Attendance.findOneAndUpdate(
-              { studentId: rec.studentId, date },
-              {
-                studentId: rec.studentId,
-                studentName: rec.studentName,
-                date,
-                status: rec.status,
-                center,
-                batch,
-              },
-              { upsert: true, new: true }
-            );
+          const updateData = {
+            studentId: String(stId),
+            studentName: rec.studentName || 'Student',
+            date,
+            sessionDate: new Date(date),
+            status,
+            center,
+            batch,
+          };
+
+          if (mongoose.Types.ObjectId.isValid(stId)) {
+            updateData.student = stId;
           }
-        } catch (e) {
-          // ignore
+
+          await Attendance.findOneAndUpdate(
+            { studentId: String(stId), date },
+            { $set: updateData },
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+          );
+
+          // 3. Update Learner User's attendanceRate in MongoDB
+          if (mongoose.Types.ObjectId.isValid(stId)) {
+            const studentHistory = await Attendance.find({ studentId: String(stId) });
+            if (studentHistory.length > 0) {
+              const presentCount = studentHistory.filter(
+                (r) => r.status === 'present' || r.status === 'late'
+              ).length;
+              const rate = Math.round((presentCount / studentHistory.length) * 100);
+
+              await User.findByIdAndUpdate(stId, {
+                $set: { 'softSkillsProfile.attendanceRate': rate },
+              });
+            }
+          }
+        } catch (dbErr) {
+          console.error('Error saving attendance to MongoDB:', dbErr.message);
         }
       }
     }
 
     res.status(200).json({
       success: true,
-      message: `Attendance for ${records.length} students recorded successfully for date ${date}.`,
+      message: `Attendance for ${records.length} students recorded successfully in database for date ${date}.`,
       date,
     });
   } catch (error) {
+    console.error('Attendance error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -339,10 +360,14 @@ exports.getAttendanceByDate = async (req, res) => {
     }
 
     const isDb = mongoose.connection.readyState === 1;
-    let records = inMemoryAttendance[date] || [];
+    let records = [];
 
-    if (isDb && records.length === 0) {
+    if (isDb) {
       records = await Attendance.find({ date });
+    }
+
+    if (!records || records.length === 0) {
+      records = inMemoryAttendance[date] || [];
     }
 
     res.status(200).json({

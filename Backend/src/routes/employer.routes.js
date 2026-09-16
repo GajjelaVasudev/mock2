@@ -3,6 +3,11 @@ const router = express.Router();
 const {
   getEmployerProfile,
   updateEmployerProfile,
+  getJobs,
+  createJob,
+  updateJob,
+  deleteJob,
+  getMatchedStudentsForJob,
   getGraduates,
   getCandidateDetails,
   getPipeline,
@@ -14,11 +19,18 @@ const {
 router.get('/profile', getEmployerProfile);
 router.put('/profile', updateEmployerProfile);
 
-// 2. Graduate Talent Pool & Candidate Search
+// 2. Real Job Openings & Role Postings
+router.get('/jobs', getJobs);
+router.post('/jobs', createJob);
+router.put('/jobs/:id', updateJob);
+router.delete('/jobs/:id', deleteJob);
+router.get('/jobs/:id/matches', getMatchedStudentsForJob);
+
+// 3. Graduate Talent Pool & Smart Candidate Matching
 router.get('/graduates', getGraduates);
 router.get('/candidates/:id', getCandidateDetails);
 
-// 3. Hiring Pipeline Management
+// 4. Hiring Pipeline Management
 router.get('/pipeline', getPipeline);
 router.post('/pipeline', addToPipeline);
 router.put('/pipeline/:id', updatePipelineStage);
