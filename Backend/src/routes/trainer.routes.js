@@ -24,6 +24,7 @@ router.get('/attendance', getAttendanceByDate);
 
 // Conduct Soft Skills Assessment
 router.post('/assessment', submitAssessment);
+router.post('/assessments', submitAssessment);
 
 // Assign & View Tasks
 router.post('/tasks', assignTask);

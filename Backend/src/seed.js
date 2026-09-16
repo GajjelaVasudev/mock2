@@ -6,6 +6,9 @@ const User = require('./models/User');
 const Attendance = require('./models/attendance.model');
 const Assessment = require('./models/assessment.model');
 const Task = require('./models/task.model');
+const Center = require('./models/center.model');
+const Cohort = require('./models/cohort.model');
+const Placement = require('./models/placement.model');
 
 const MONGO_URI =
   process.env.MONGO_URI ||
@@ -15,11 +18,29 @@ async function seedDatabase() {
   try {
     console.log('Connecting to MongoDB Atlas...');
     await mongoose.connect(MONGO_URI);
-    console.log('MongoDB connected successfully for seeding.');
+    console.log('MongoDB connected successfully.');
 
     const hashedPassword = await bcrypt.hash('password123', 10);
 
-    // 1. Seed Trainer Account
+    // 1. Seed Admin User
+    const adminData = {
+      name: 'Dr. Meenakshi & Impact Team',
+      email: 'admin@etasha.org',
+      phone: '9876543213',
+      password: hashedPassword,
+      role: 'admin',
+      designation: 'Program & M&E Director',
+      center: 'Central HQ',
+      preferredLanguage: 'en',
+    };
+    await User.findOneAndUpdate(
+      { email: adminData.email },
+      adminData,
+      { upsert: true, returnDocument: 'after' }
+    );
+    console.log('Admin account ready: admin@etasha.org');
+
+    // 2. Seed Trainer User
     const trainerData = {
       name: 'Sunita Sharma',
       email: 'sunita.trainer@etasha.org',
@@ -30,15 +51,129 @@ async function seedDatabase() {
       batch: 'Lead Facilitator - Soft Skills & Spoken English',
       preferredLanguage: 'en',
     };
-
-    const trainer = await User.findOneAndUpdate(
-      { $or: [{ email: trainerData.email }, { phone: trainerData.phone }] },
+    await User.findOneAndUpdate(
+      { email: trainerData.email },
       trainerData,
       { upsert: true, returnDocument: 'after' }
     );
-    console.log('Trainer account ready:', trainer.email);
+    console.log('Trainer account ready: sunita.trainer@etasha.org');
 
-    // 2. Sample Students List
+    // 3. Seed Employer User
+    const employerData = {
+      name: 'Rajesh Mehra',
+      email: 'rajesh.employer@etasha.org',
+      phone: '9876543212',
+      password: hashedPassword,
+      role: 'employer',
+      organization: 'Apex Retail Partners',
+      designation: 'Head of Talent Acquisition',
+      center: 'Central HQ',
+      preferredLanguage: 'en',
+    };
+    await User.findOneAndUpdate(
+      { email: employerData.email },
+      employerData,
+      { upsert: true, returnDocument: 'after' }
+    );
+    console.log('Employer account ready: rajesh.employer@etasha.org');
+
+    // 4. Seed Training Centers (CDCs)
+    const centersData = [
+      {
+        name: 'Sangam Vihar CDC',
+        location: 'Sangam Vihar, South Delhi',
+        address: 'B-Block, Gali No. 4, Sangam Vihar, New Delhi - 110080',
+        leadTrainer: 'Sunita Sharma',
+        capacity: 75,
+        activeBatchesCount: 2,
+        contactPhone: '011-29987654',
+        establishedYear: 2008,
+        status: 'active',
+      },
+      {
+        name: 'Khanpur CDC',
+        location: 'Khanpur Extension, South Delhi',
+        address: 'Main Devli Road, Khanpur, New Delhi - 110062',
+        leadTrainer: 'Sunita Sharma',
+        capacity: 60,
+        activeBatchesCount: 1,
+        contactPhone: '011-29987655',
+        establishedYear: 2012,
+        status: 'active',
+      },
+      {
+        name: 'Dakshinpuri CDC',
+        location: 'Dakshinpuri Resettlement Colony',
+        address: 'Sector 5, Dakshinpuri, New Delhi - 110062',
+        leadTrainer: 'Priya Narang',
+        capacity: 60,
+        activeBatchesCount: 1,
+        contactPhone: '011-29987656',
+        establishedYear: 2015,
+        status: 'active',
+      },
+      {
+        name: 'Mangolpuri CDC',
+        location: 'Mangolpuri, North-West Delhi',
+        address: 'Block O, Mangolpuri Industrial Area, Delhi - 110083',
+        leadTrainer: 'Ramesh Chander',
+        capacity: 50,
+        activeBatchesCount: 1,
+        contactPhone: '011-29987657',
+        establishedYear: 2018,
+        status: 'active',
+      },
+    ];
+
+    await Center.deleteMany({});
+    await Center.insertMany(centersData);
+    console.log(`Seeded ${centersData.length} training centers.`);
+
+    // 5. Seed Cohorts / Batches
+    const cohortsData = [
+      {
+        name: 'Batch 2026-A',
+        courseName: 'Retail & Workplace Soft Skills Readiness',
+        center: 'Sangam Vihar CDC',
+        trainerName: 'Sunita Sharma',
+        startDate: '2026-01-15',
+        endDate: '2026-04-30',
+        maxCapacity: 30,
+        enrolledCount: 5,
+        placementTarget: 80,
+        status: 'active',
+      },
+      {
+        name: 'Batch 2026-B',
+        courseName: 'BPO & Digital Communication Skills',
+        center: 'Khanpur CDC',
+        trainerName: 'Sunita Sharma',
+        startDate: '2026-02-01',
+        endDate: '2026-05-15',
+        maxCapacity: 25,
+        enrolledCount: 2,
+        placementTarget: 75,
+        status: 'active',
+      },
+      {
+        name: 'Batch 2026-C',
+        courseName: 'Customer Care & Front Office Operations',
+        center: 'Dakshinpuri CDC',
+        trainerName: 'Priya Narang',
+        startDate: '2026-02-15',
+        endDate: '2026-05-30',
+        maxCapacity: 25,
+        enrolledCount: 1,
+        placementTarget: 80,
+        status: 'active',
+      },
+    ];
+
+    await Cohort.deleteMany({});
+    await Cohort.insertMany(cohortsData);
+    console.log(`Seeded ${cohortsData.length} cohorts.`);
+
+    // 6. Seed Students (8 Trainees)
     const sampleStudents = [
       {
         name: 'Pooja Kumari',
@@ -161,7 +296,7 @@ async function seedDatabase() {
         password: hashedPassword,
         role: 'learner',
         center: 'Dakshinpuri CDC',
-        batch: 'Batch 2026-B',
+        batch: 'Batch 2026-C',
         softSkillsProfile: {
           confidenceScore: 48,
           communicationScore: 52,
@@ -194,7 +329,6 @@ async function seedDatabase() {
       },
     ];
 
-    // Remove existing sample students first to avoid unique key conflicts
     const sampleEmails = sampleStudents.map((s) => s.email);
     const samplePhones = sampleStudents.map((s) => s.phone);
     await User.deleteMany({
@@ -202,114 +336,56 @@ async function seedDatabase() {
     });
 
     const insertedStudents = await User.insertMany(sampleStudents);
-    console.log(`Successfully seeded ${insertedStudents.length} sample students in MongoDB Atlas.`);
+    console.log(`Seeded ${insertedStudents.length} students.`);
 
-    // 3. Seed Sample Tasks
-    const sampleTasks = [
-      {
-        title: 'Record 30-Second Professional Self-Introduction',
-        description: 'Practice state of origin, education, career objective, and why you want to work in retail.',
-        category: 'Spoken English',
-        targetType: 'batch',
-        batch: 'Batch 2026-A',
-        dueDate: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
-        status: 'pending',
-      },
-      {
-        title: 'Customer Complaint Handling Roleplay Exercise',
-        description: 'Prepare a 2-minute dialogue handling an angry customer returning a defective product with courtesy.',
-        category: 'Customer Service Roleplay',
-        targetType: 'batch',
-        batch: 'Batch 2026-A',
-        dueDate: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0],
-        status: 'pending',
-      },
-      {
-        title: 'Remedial 1-on-1 English Greeting & Confidence Practice',
-        description: 'Practice formal greetings and personal pitch with peer mentor.',
-        category: 'Spoken English',
-        targetType: 'individual',
-        studentId: insertedStudents[1]._id, // Rahul
-        studentName: insertedStudents[1].name,
-        batch: 'Batch 2026-A',
-        dueDate: new Date(Date.now() + 1 * 86400000).toISOString().split('T')[0],
-        status: 'pending',
-      },
-      {
-        title: 'Frontline Retail Cashier & Customer Courtesy Simulation',
-        description: 'Roleplay answering price inquiries and greeting shoppers.',
-        category: 'Mock Interview',
-        targetType: 'batch',
-        batch: 'Batch 2026-B',
-        dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
-        status: 'pending',
-      },
-    ];
-
-    await Task.deleteMany({});
-    await Task.insertMany(sampleTasks);
-    console.log(`Successfully seeded ${sampleTasks.length} practice tasks.`);
-
-    // 4. Seed Attendance
-    const today = new Date().toISOString().split('T')[0];
-    const attendanceRecords = insertedStudents.map((st, idx) => ({
-      studentId: st._id,
-      studentName: st.name,
-      date: today,
-      status: idx === 1 || idx === 3 ? 'absent' : idx === 6 ? 'late' : 'present',
-      batch: st.batch || 'Batch 2026-A',
-      center: st.center || 'Sangam Vihar CDC',
-    }));
-
-    await Attendance.deleteMany({ date: today });
-    await Attendance.insertMany(attendanceRecords);
-    console.log(`Successfully seeded attendance records for ${today}.`);
-
-    // 5. Seed Assessments
-    const assessmentRecords = [
+    // 7. Seed Placements
+    const placementsData = [
       {
         studentId: insertedStudents[0]._id, // Pooja
         studentName: insertedStudents[0].name,
-        confidenceScore: 78,
-        communicationScore: 82,
-        workplaceEtiquetteScore: 85,
-        interviewReadinessScore: 74,
-        overallScore: 80,
-        remarks: 'Active participant in retail customer scenarios.',
-        badgesAwarded: ['Active Communicator', 'Confidence Champion'],
+        employerName: 'Apex Retail Partners',
+        roleTitle: 'Customer Care & Cash Desk Associate',
+        sector: 'Retail',
+        monthlySalary: 16500,
+        placementDate: '2026-03-01',
+        center: 'Sangam Vihar CDC',
+        batch: 'Batch 2026-A',
+        status: 'placed',
       },
       {
         studentId: insertedStudents[2]._id, // Anjali
         studentName: insertedStudents[2].name,
-        confidenceScore: 86,
-        communicationScore: 88,
-        workplaceEtiquetteScore: 92,
-        interviewReadinessScore: 84,
-        overallScore: 88,
-        remarks: 'Excellent articulation and professional demeanor. Ready for placement interviews.',
-        badgesAwarded: ['Customer Service Star', 'Team Leader'],
+        employerName: 'Landmark Hospitality Group',
+        roleTitle: 'Front Office Guest Coordinator',
+        sector: 'Hospitality',
+        monthlySalary: 18000,
+        placementDate: '2026-03-05',
+        center: 'Sangam Vihar CDC',
+        batch: 'Batch 2026-A',
+        status: 'placed',
       },
       {
-        studentId: insertedStudents[1]._id, // Rahul
-        studentName: insertedStudents[1].name,
-        confidenceScore: 52,
-        communicationScore: 58,
-        workplaceEtiquetteScore: 65,
-        interviewReadinessScore: 48,
-        overallScore: 56,
-        remarks: 'Needs support with spoken English fluency and maintaining eye contact.',
-        badgesAwarded: ['New Trainee'],
+        studentId: insertedStudents[5]._id, // Mohit
+        studentName: insertedStudents[5].name,
+        employerName: 'TechCare Customer Solutions',
+        roleTitle: 'Customer Support Representative',
+        sector: 'BPO / Customer Service',
+        monthlySalary: 17500,
+        placementDate: '2026-03-10',
+        center: 'Khanpur CDC',
+        batch: 'Batch 2026-B',
+        status: 'placed',
       },
     ];
 
-    await Assessment.deleteMany({});
-    await Assessment.insertMany(assessmentRecords);
-    console.log(`Successfully seeded sample soft skills assessments.`);
+    await Placement.deleteMany({});
+    await Placement.insertMany(placementsData);
+    console.log(`Seeded ${placementsData.length} corporate placements.`);
 
-    console.log('Done! All sample student data seeded successfully.');
+    console.log('All Admin & Multi-role sample data seeded successfully!');
     process.exit(0);
   } catch (error) {
-    console.error('Seeding failed:', error);
+    console.error('Seeding error:', error);
     process.exit(1);
   }
 }

@@ -28,14 +28,6 @@ const userSchema = new mongoose.Schema(
     },
     center: {
       type: String,
-      enum: [
-        'Khanpur CDC',
-        'Sangam Vihar CDC',
-        'Dakshinpuri CDC',
-        'Mangolpuri CDC',
-        'Partner ITI / WCSC',
-        'Central HQ',
-      ],
       default: 'Sangam Vihar CDC',
     },
     batch: {

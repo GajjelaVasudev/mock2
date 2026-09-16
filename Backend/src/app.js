@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
 const trainerRoutes = require('./routes/trainer.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trainer', trainerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

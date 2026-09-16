@@ -5,6 +5,7 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { LoginPage } from './components/LoginPage';
 import { DashboardPreview } from './components/DashboardPreview';
 import { TrainerDashboard } from './components/TrainerDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
 
 export function App() {
   const { user } = useAuth();
@@ -21,10 +22,10 @@ export function App() {
         navigator.serviceWorker
           .register('/sw.js')
           .then((registration) => {
-            console.log('⚡ [PWA] Service Worker registered:', registration.scope);
+            console.log('PWA Service Worker registered:', registration.scope);
           })
           .catch((error) => {
-            console.warn('⚠️ [PWA] Service Worker registration failed:', error);
+            console.warn('PWA Service Worker registration failed:', error);
           });
       });
     }
@@ -89,6 +90,8 @@ export function App() {
       <main className="main-wrapper">
         {!user ? (
           <LoginPage />
+        ) : user.role === 'admin' ? (
+          <AdminDashboard />
         ) : user.role === 'trainer' ? (
           <TrainerDashboard />
         ) : (
