@@ -10,7 +10,7 @@ const requireRole = require('../middlewares/role.middleware');
 
 router.get('/me', authenticate, requireRole('student', 'alumni'), studentController.getMyProfile);
 router.put('/me', authenticate, requireRole('student', 'alumni'), studentController.updateMyProfile);
-router.get('/me', authenticate, requireRole('student', 'alumni'), assessmentController.getMyAssessments);
+router.get('/me/assessments', authenticate, requireRole('student', 'alumni'), assessmentController.getMyAssessments);
 router.get('/me/attendance', authenticate, requireRole('student', 'alumni'), attendanceController.getMyAttendance);
 router.post('/me/mock-interview', authenticate, requireRole('student', 'alumni'), mockInterviewController.submitMockInterview);
 router.get('/me/mock-interview/history', authenticate, requireRole('student', 'alumni'), mockInterviewController.getMockInterviewHistory);
