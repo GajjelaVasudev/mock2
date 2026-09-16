@@ -11,7 +11,7 @@ const mentorshipRoutes = require('./routes/mentorship.routes');
 
 
 const app = express();
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/auth.routes');
 const studentRoutes = require('./routes/student.routes');
 const contentRoutes = require('./routes/content.routes');
 const assessmentRoutes = require('./routes/assesment.routes');
@@ -40,7 +40,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/employer', employerRoutes);
 app.use('/api', mentorshipRoutes);
 app.use('/api/community', communityRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/learners', studentRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/self-assessments', assessmentRoutes);
