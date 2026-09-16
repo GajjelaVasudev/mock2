@@ -1,5 +1,7 @@
 const communityPostModel = require('../models/communityPost.model');
 const postReplyModel = require('../models/postReply.model');
+const learnerModel = require('../models/learner.model');
+const skillAssessmentModel = require('../models/skillAssessment.model');
 
 async function getPosts(req, res) {
     const posts = await communityPostModel
@@ -55,4 +57,42 @@ async function createReply(req, res) {
     return res.status(201).json({ message: 'Reply added', reply });
 }
 
-module.exports = { getPosts, createPost, getReplies, createReply };
+async function getSuccessStories(req, res) {
+    const placedLearners = await learnerModel
+        .find({ placementStatus: 'placed' })
+        .populate('user', 'username')
+        .sort({ placedDate: -1 })
+        .limit(10);
+
+    const stories = await Promise.all(
+        placedLearners.map(async (learner) => {
+            const assessments = await skillAssessmentModel
+                .find({ learner: learner._id })
+                .sort({ createdAt: 1 }); // oldest first
+
+            let growth = null;
+            if (assessments.length >= 2) {
+                const first = assessments[0];
+                const last = assessments[assessments.length - 1];
+                growth = {
+                    from: first.score,
+                    to: last.score,
+                    skillCategory: last.skillCategory
+                };
+            }
+
+            return {
+                name: learner.user?.username,
+                center: learner.center,
+                company: learner.placedCompany,
+                role: learner.placedRole,
+                placedDate: learner.placedDate,
+                growth
+            };
+        })
+    );
+
+    return res.status(200).json({ stories });
+}
+
+module.exports = { getPosts, createPost, getReplies, createReply, getSuccessStories };
