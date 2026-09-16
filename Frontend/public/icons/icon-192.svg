@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="etashaGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9800" />
+      <stop offset="100%" stop-color="#E65100" />
+    </linearGradient>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#112E51" />
+      <stop offset="100%" stop-color="#081526" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bgGrad192)" />
+  <!-- Bridge Arch -->
+  <path d="M 36 140 Q 96 55 156 140" fill="none" stroke="url(#etashaGrad192)" stroke-width="12" stroke-linecap="round" />
+  <!-- Star / Spark of Opportunity -->
+  <circle cx="96" cy="65" r="18" fill="#FFB74D" />
+  <path d="M 96 30 L 100 48 L 114 52 L 100 58 L 96 76 L 92 58 L 78 52 L 92 48 Z" fill="#FFE082" />
+  <!-- Foundation Line -->
+  <line x1="48" y1="152" x2="144" y2="152" stroke="#4DD0E1" stroke-width="8" stroke-linecap="round" />
+  <text x="96" y="176" text-anchor="middle" fill="#FFFFFF" font-family="'Inter', sans-serif" font-size="14" font-weight="700" letter-spacing="1">ETASHA</text>
+</svg>
