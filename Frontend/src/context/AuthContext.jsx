@@ -103,8 +103,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(data.user);
-      setToken(data.token);
-      setLoading(false);
+setToken(data.token || 'session-active');      setLoading(false);
       return { success: true, user: data.user };
     } catch (err) {
       // If offline or network error, fallback gracefully to matching preset if present
@@ -150,8 +149,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(data.user);
-      setToken(data.token);
-      setLoading(false);
+setToken(data.token || 'session-active');      setLoading(false);
       return { success: true, user: data.user };
     } catch (err) {
       // Local fallback for testing

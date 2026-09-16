@@ -2112,3 +2112,439 @@ body {
   background-color: var(--surface-card);
   margin-top: auto;
 }
+/* ==========================================================================
+   STUDENT DASHBOARD (MONOCHROME & MINIMALIST)
+   ========================================================================== */
+
+.student-dashboard {
+  width: 100%;
+  max-width: 1050px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-header h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.dashboard-header p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-muted);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: var(--color-gray-200);
+}
+
+.dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-tabs .tab:hover {
+  background-color: var(--surface-muted);
+}
+
+.dashboard-tabs .tab.active {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.dashboard-content {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-content h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.9rem;
+}
+
+.skill-summary-grid,
+.module-list,
+.badge-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.skill-card,
+.module-card,
+.badge-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  background-color: var(--surface-muted);
+}
+
+.skill-card h3,
+.module-card h3,
+.badge-card h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: capitalize;
+  margin-bottom: 0.35rem;
+}
+
+.skill-card p,
+.module-card p,
+.badge-card p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+}
+
+.badge-card {
+  text-align: center;
+}
+
+.badge-icon {
+  font-size: 1.6rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  text-transform: capitalize;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.post-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  background-color: var(--surface-muted);
+}
+
+.post-card strong {
+  font-size: 0.82rem;
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.post-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.error-text {
+  color: #B91C1C;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+
+/* ==========================================================================
+   MOCK INTERVIEW
+   ========================================================================== */
+
+.mock-interview-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  background-color: var(--surface-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 480px;
+}
+
+.mock-interview-card .question-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.record-btn,
+.stop-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.record-btn {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.record-btn:hover {
+  background-color: var(--color-gray-800);
+}
+
+.stop-btn {
+  background-color: #B91C1C;
+  color: var(--color-white);
+}
+
+.stop-btn:hover {
+  background-color: #991B1B;
+}
+
+.processing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.processing-indicator .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.result-box {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  background-color: var(--surface-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.result-box p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.result-box .feedback-text {
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   SELF-ASSESSMENT / COMMUNITY / MENTORSHIP (added for Student & Alumni scope)
+   ========================================================================== */
+
+.section-heading-spaced {
+  margin-top: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-row select,
+.form-row textarea,
+.form-row input[type='range'] {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--text-main);
+  background-color: var(--surface-card);
+}
+
+.assessment-form,
+.post-form {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background-color: var(--surface-muted);
+  max-width: 480px;
+  margin-top: 0.75rem;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: none;
+  margin-bottom: 1rem;
+}
+
+.post-form textarea {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.primary-btn {
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.primary-btn:hover {
+  background-color: var(--color-gray-800);
+}
+
+.primary-btn:disabled {
+  background-color: var(--color-gray-400, #9CA3AF);
+  cursor: not-allowed;
+}
+
+.primary-btn.small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.form-msg {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.4rem;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.link-btn:hover {
+  color: var(--text-main);
+}
+
+.reply-thread {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reply-item {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.7rem;
+}
+
+.reply-item strong {
+  font-size: 0.75rem;
+  color: var(--text-main);
+}
+
+.reply-item p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.reply-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.reply-input-row input {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+}

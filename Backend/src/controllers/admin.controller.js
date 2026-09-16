@@ -132,14 +132,14 @@ exports.getAdminOverview = async (req, res) => {
       }
 
       totalUsers = await User.countDocuments();
-      studentsCount = await User.countDocuments({ role: 'learner' });
+      studentsCount = await User.countDocuments({ role: 'student' });
       trainersCount = await User.countDocuments({ role: 'trainer' });
       employersCount = await User.countDocuments({ role: 'employer' });
       centersCount = await Center.countDocuments({ status: 'active' });
       activeCohortsCount = await Cohort.countDocuments({ status: 'active' });
       placedCount = await Placement.countDocuments({ status: 'placed' });
 
-      const allLearners = await User.find({ role: 'learner' });
+      const allLearners = await User.find({ role: 'student' });
       if (allLearners.length > 0) {
         atRiskCount = allLearners.filter(
           (s) =>
@@ -220,7 +220,7 @@ exports.createUser = async (req, res) => {
       email,
       phone,
       password = 'password123',
-      role = 'learner',
+      role = 'student',
       center = 'Sangam Vihar CDC',
       batch,
       organization,
@@ -240,7 +240,7 @@ exports.createUser = async (req, res) => {
       password: hashedPassword,
       role,
       center,
-      batch: batch || (role === 'learner' ? 'Batch 2026-A' : undefined),
+      batch: batch || (role === 'student' ? 'Batch 2026-A' : undefined),
       organization,
       softSkillsProfile: {
         confidenceScore: 65,
@@ -329,7 +329,7 @@ exports.getCenters = async (req, res) => {
       const enrichedCenters = await Promise.all(
         centers.map(async (c) => {
           const doc = c.toObject();
-          const learnerCount = await User.countDocuments({ role: 'learner', center: c.name });
+          const learnerCount = await User.countDocuments({ role: 'student', center: c.name });
           const batchCount = await Cohort.countDocuments({ center: c.name, status: 'active' });
           return {
             ...doc,
@@ -421,7 +421,7 @@ exports.getCohorts = async (req, res) => {
         cohorts.map(async (co) => {
           const doc = co.toObject();
           const enrolled = await User.countDocuments({
-            role: 'learner',
+            role: 'student',
             $or: [{ batch: co.name }, { center: co.center }],
           });
           return {
@@ -516,7 +516,7 @@ exports.getEnrollmentAndAttendance = async (req, res) => {
     if (isDb) {
       const centers = await Center.find({ status: 'active' });
       for (const c of centers) {
-        const learners = await User.find({ role: 'learner', center: c.name });
+        const learners = await User.find({ role: 'student', center: c.name });
         const enrolled = learners.length;
         const avgAtt =
           enrolled > 0
@@ -558,7 +558,7 @@ exports.getSkillProgression = async (req, res) => {
     let learners = [];
 
     if (isDb) {
-      learners = await User.find({ role: 'learner' });
+      learners = await User.find({ role: 'student' });
     }
 
     const count = learners.length || 1;
@@ -631,7 +631,7 @@ exports.recordPlacement = async (req, res) => {
 
     if (isDb) {
       // Find learner if exists
-      const learner = await User.findOne({ name: studentName, role: 'learner' });
+      const learner = await User.findOne({ name: studentName, role: 'student' });
 
       newPlacement = await Placement.create({
         studentId: learner ? learner._id : undefined,
@@ -690,7 +690,7 @@ exports.getImpactReport = async (req, res) => {
     let placements = [];
 
     if (isDb) {
-      totalLearners = await User.countDocuments({ role: 'learner' });
+      totalLearners = await User.countDocuments({ role: 'student' });
       placements = await Placement.find({ status: 'placed' });
       placedCount = placements.length;
 

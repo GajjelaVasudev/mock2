@@ -38,8 +38,10 @@ async function registerUser(req, res) {
 
     const user = await userModel.create({
         username: resolvedUsername,
+        name: resolvedUsername, // mirror — trainer/admin/employer code reads `name`
         email,
         phoneNumber: phone,
+        phone, // mirror — trainer/admin/employer code reads `phone`
         password: hashedPassword,
         role: resolvedRole
     });
