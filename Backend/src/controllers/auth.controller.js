@@ -3,10 +3,33 @@ const learnerModel = require('../models/learner.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-async function registerUser(req, res) {
-    const { username, email, password, role } = req.body;
+// Roles the frontend may send that map onto our schema's enum
+const ROLE_ALIASES = {
+    learner: 'student'
+};
 
-    const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
+function normalizeRole(role) {
+    if (!role) return 'student';
+    return ROLE_ALIASES[role] || role;
+}
+
+async function registerUser(req, res) {
+    // Accept both the current schema's field names and the frontend's actual
+    // payload shape (name/phone instead of username, "learner" instead of "student")
+    const { username, name, email, phone, password, role } = req.body;
+    const resolvedUsername = username || name;
+    const resolvedRole = normalizeRole(role);
+
+    if (!resolvedUsername || !password) {
+        return res.status(400).json({ message: 'Name/username and password are required' });
+    }
+
+    const existingUser = await userModel.findOne({
+        $or: [
+            ...(resolvedUsername ? [{ username: resolvedUsername }] : []),
+            ...(email ? [{ email }] : [])
+        ]
+    });
     if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
     }
@@ -14,13 +37,14 @@ async function registerUser(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
-        username,
+        username: resolvedUsername,
         email,
+        phoneNumber: phone,
         password: hashedPassword,
-        role
+        role: resolvedRole
     });
 
-    if (role === 'student') {
+    if (resolvedRole === 'student') {
         await learnerModel.create({ user: user._id });
     }
 
@@ -35,9 +59,21 @@ async function registerUser(req, res) {
 }
 
 async function LoginUser(req, res) {
-    const { email, password, username } = req.body;
+    // Accept the current schema's field names, plus the frontend's actual
+    // payload shape (a single "identifier" that could be a username or email)
+    const { email, password, username, identifier } = req.body;
 
-    const user = await userModel.findOne({ $or: [{ username }, { email }] });
+    if (!password || (!email && !username && !identifier)) {
+        return res.status(400).json({ message: 'Email/username and password are required' });
+    }
+
+    const user = await userModel.findOne({
+        $or: [
+            ...(username ? [{ username }] : []),
+            ...(email ? [{ email }] : []),
+            ...(identifier ? [{ username: identifier }, { email: identifier }] : [])
+        ]
+    });
     if (!user) {
         return res.status(400).json({ message: 'Invalid email or password' });
     }
