@@ -11,6 +11,8 @@ const authRoutes = require('./routes/auth.routes');
 const studentRoutes = require('./routes/student.routes');
 const contentRoutes = require('./routes/content.routes');
 const assessmentRoutes = require('./routes/assesment.routes');
+const communityRoutes = require('./routes/community.routes');
+
 
 // Middleware
 app.use(
@@ -32,6 +34,7 @@ app.use(cookieParser());
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/employer', employerRoutes);
+app.use('/api/community', communityRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
