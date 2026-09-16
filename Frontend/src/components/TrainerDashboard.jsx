@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import {
   Users,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export const TrainerDashboard = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   // Active Tab
@@ -322,7 +324,7 @@ export const TrainerDashboard = () => {
 
         <button className="btn-logout" onClick={logout}>
           <LogOut size={14} />
-          <span>Sign Out</span>
+          <span>{t('dashboards.logout')}</span>
         </button>
       </div>
 

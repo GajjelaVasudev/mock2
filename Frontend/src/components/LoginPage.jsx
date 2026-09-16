@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, User, Lock, Mail, Phone, Building, MapPin } from 'lucide-react';
 
 export const LoginPage = () => {
-  const { login, register, loading, DEMO_PRESETS } = useAuth();
+  const { login, register, loading } = useAuth();
+  const { t } = useTranslation();
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [role, setRole] = useState('learner');
@@ -66,25 +68,14 @@ export const LoginPage = () => {
     }
   };
 
-  const handleDemoClick = (roleKey) => {
-    const preset = DEMO_PRESETS[roleKey];
-    if (preset) {
-      setRole(roleKey);
-      setIdentifier(preset.identifier);
-      setPassword(preset.password);
-      setErrorMsg('');
-      login(preset.identifier, preset.password, roleKey);
-    }
-  };
-
   return (
     <div className="auth-card">
       <div className="auth-header">
-        <h2>{mode === 'login' ? 'Sign In' : 'Register Account'}</h2>
+        <h2>{mode === 'login' ? t('login.signInTitle') : t('login.registerTitle')}</h2>
         <p>
           {mode === 'login'
-            ? 'Sign in to ETASHA SkillSetu'
-            : 'Create new learner or staff account'}
+            ? t('login.signInSub')
+            : t('login.registerSub')}
         </p>
       </div>
 
@@ -108,7 +99,7 @@ export const LoginPage = () => {
             resetForm();
           }}
         >
-          Register
+          {t('login.tabRegister')}
         </button>
       </div>
 
@@ -119,16 +110,16 @@ export const LoginPage = () => {
       <form onSubmit={handleSubmit}>
         {/* Role Selector */}
         <div className="form-group">
-          <label className="form-label">Role</label>
+          <label className="form-label">{t('login.roleLabel')}</label>
           <select
             className="form-select"
             value={role}
             onChange={(e) => setRole(e.target.value)}
           >
-            <option value="learner">Learner / Trainee</option>
-            <option value="trainer">Trainer / Facilitator</option>
-            <option value="employer">Employer Partner</option>
-            <option value="admin">Impact & Leadership (Admin)</option>
+            <option value="learner">{t('login.roles.learner')}</option>
+            <option value="trainer">{t('login.roles.trainer')}</option>
+            <option value="employer">{t('login.roles.employer')}</option>
+            <option value="admin">{t('login.roles.admin')}</option>
           </select>
         </div>
 
@@ -136,13 +127,13 @@ export const LoginPage = () => {
           <>
             {/* Full Name */}
             <div className="form-group">
-              <label className="form-label">Full Name</label>
+              <label className="form-label">{t('login.fullName')}</label>
               <div className="input-wrapper">
                 <User size={15} className="input-icon" />
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Full name"
+                  placeholder={t('login.fullName')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -152,13 +143,13 @@ export const LoginPage = () => {
 
             {/* Email Address */}
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label">{t('login.emailLabel')}</label>
               <div className="input-wrapper">
                 <Mail size={15} className="input-icon" />
                 <input
                   type="email"
                   className="form-input"
-                  placeholder="e.g. name@etasha.org"
+                  placeholder={t('login.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
@@ -168,13 +159,13 @@ export const LoginPage = () => {
 
             {/* Mobile Number */}
             <div className="form-group">
-              <label className="form-label">Mobile Number</label>
+              <label className="form-label">{t('login.mobileLabel')}</label>
               <div className="input-wrapper">
                 <Phone size={15} className="input-icon" />
                 <input
                   type="tel"
                   className="form-input"
-                  placeholder="e.g. 9876543210"
+                  placeholder={t('login.mobilePlaceholder')}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   autoComplete="tel"
@@ -184,7 +175,7 @@ export const LoginPage = () => {
 
             {/* CDC Center */}
             <div className="form-group">
-              <label className="form-label">Training Center (CDC)</label>
+              <label className="form-label">{t('login.centerLabel')}</label>
               <div className="input-wrapper">
                 <MapPin size={15} className="input-icon" />
                 <select
@@ -204,13 +195,13 @@ export const LoginPage = () => {
 
             {role === 'employer' && (
               <div className="form-group">
-                <label className="form-label">Company / Organization</label>
+                <label className="form-label">{t('login.companyLabel')}</label>
                 <div className="input-wrapper">
                   <Building size={15} className="input-icon" />
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Organization name"
+                    placeholder={t('login.companyPlaceholder')}
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                   />
@@ -221,13 +212,13 @@ export const LoginPage = () => {
         ) : (
           /* Login Mode: Email or Mobile Number */
           <div className="form-group">
-            <label className="form-label">Email or Mobile Number</label>
+            <label className="form-label">{t('login.identifierLabel')}</label>
             <div className="input-wrapper">
               <Mail size={15} className="input-icon" />
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. user@etasha.org or 9876543210"
+                placeholder={t('login.identifierPlaceholder')}
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 autoComplete="username"
@@ -239,13 +230,13 @@ export const LoginPage = () => {
 
         {/* Password */}
         <div className="form-group">
-          <label className="form-label">Password</label>
+          <label className="form-label">{t('login.passwordLabel')}</label>
           <div className="input-wrapper">
             <Lock size={15} className="input-icon" />
             <input
               type={showPassword ? 'text' : 'password'}
               className="form-input"
-              placeholder="Enter password"
+              placeholder={t('login.passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -263,44 +254,9 @@ export const LoginPage = () => {
         </div>
 
         <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+          {loading ? t('login.processing') : mode === 'login' ? t('login.btnSignIn') : t('login.btnRegister')}
         </button>
       </form>
-
-      {/* Demo Credentials */}
-      <div className="demo-section">
-        <div className="demo-title">Demo Accounts</div>
-        <div className="demo-buttons">
-          <button
-            type="button"
-            className="btn-demo"
-            onClick={() => handleDemoClick('learner')}
-          >
-            Learner (Pooja)
-          </button>
-          <button
-            type="button"
-            className="btn-demo"
-            onClick={() => handleDemoClick('trainer')}
-          >
-            Trainer (Sunita)
-          </button>
-          <button
-            type="button"
-            className="btn-demo"
-            onClick={() => handleDemoClick('employer')}
-          >
-            Employer (Apex)
-          </button>
-          <button
-            type="button"
-            className="btn-demo"
-            onClick={() => handleDemoClick('admin')}
-          >
-            Admin (Team)
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

@@ -7,100 +7,7 @@ const Job = require('../models/job.model');
 const mongoose = require('mongoose');
 
 // Default initial jobs for initial DB population & resilience
-const DEFAULT_JOBS = [
-  {
-    title: 'Customer Sales Associate',
-    roleCategory: 'Retail',
-    employerName: 'Apex Retail Partners',
-    contactPerson: 'Rajesh Mehra',
-    email: 'rajesh.employer@etasha.org',
-    phone: '+91 98102 33445',
-    openings: 15,
-    minSalary: 16000,
-    maxSalary: 20000,
-    location: 'South Delhi (Sangam Vihar & Saket)',
-    jobType: 'Full-Time',
-    description: 'Engage with walk-in customers, present lifestyle merchandise, handle queries with active listening, and support POS billing.',
-    requirements: [
-      'Polite spoken English & fluent Hindi',
-      'Positive body language & professional grooming',
-      'Active listening and customer empathy',
-    ],
-    requiredBadges: ['Active Communicator', 'Confidence Champion'],
-    minConfidenceScore: 70,
-    minAttendanceRate: 80,
-    status: 'active',
-  },
-  {
-    title: 'Frontline Cashier & Billing Specialist',
-    roleCategory: 'Retail',
-    employerName: 'Apex Retail Partners',
-    contactPerson: 'Rajesh Mehra',
-    email: 'rajesh.employer@etasha.org',
-    phone: '+91 98102 33445',
-    openings: 8,
-    minSalary: 16500,
-    maxSalary: 21000,
-    location: 'Khanpur & Dakshinpuri CDC Clusters',
-    jobType: 'Full-Time',
-    description: 'Process cash, digital payments, card transactions, issue invoices, maintain daily registers, and handle returns.',
-    requirements: [
-      'Basic numerical accuracy and digital literacy',
-      'Punctuality and high integrity',
-      'Calm communication under busy rush hours',
-    ],
-    requiredBadges: ['Punctuality Star', 'Workplace Ethics'],
-    minConfidenceScore: 65,
-    minAttendanceRate: 85,
-    status: 'active',
-  },
-  {
-    title: 'Customer Support / Tele-Advisor',
-    roleCategory: 'Customer Care / BPO',
-    employerName: 'Apex Voice & Support Hub',
-    contactPerson: 'Anjali Verma',
-    email: 'hiring@apexsupport.org',
-    phone: '+91 98765 43212',
-    openings: 12,
-    minSalary: 18000,
-    maxSalary: 24000,
-    location: 'Noida / Remote Hybrid',
-    jobType: 'Full-Time',
-    description: 'Handle inbound customer queries regarding orders, resolve grievances, update CRM tickets, and provide delightful phone service.',
-    requirements: [
-      'Fluent verbal communication in English and Hindi',
-      'Active listening and phone etiquette',
-      'Ability to navigate computer screens while on calls',
-    ],
-    requiredBadges: ['Active Communicator', 'Communication Star'],
-    minConfidenceScore: 75,
-    minAttendanceRate: 80,
-    status: 'active',
-  },
-  {
-    title: 'Front Desk & Guest Relations Executive',
-    roleCategory: 'Hospitality',
-    employerName: 'Grand Horizon Hospitality',
-    contactPerson: 'Karan Malhotra',
-    email: 'recruiter@grandhorizon.com',
-    phone: '+91 99112 88776',
-    openings: 6,
-    minSalary: 17500,
-    maxSalary: 22500,
-    location: 'Central Delhi & Aerocity',
-    jobType: 'Full-Time',
-    description: 'Welcome hotel and dining guests, manage check-in registers, coordinate visitor inquiries, and deliver warm guest experiences.',
-    requirements: [
-      'Pleasant personality and polished presentation',
-      'Clear spoken English conversation',
-      'Confidence in face-to-face interaction',
-    ],
-    requiredBadges: ['Confidence Champion', 'Customer Service Star'],
-    minConfidenceScore: 72,
-    minAttendanceRate: 85,
-    status: 'active',
-  },
-];
+const DEFAULT_JOBS = [];
 
 // Helper to calculate student match score against a job
 function calculateMatchScore(student, job) {
@@ -171,13 +78,13 @@ exports.getEmployerProfile = async (req, res) => {
     let activeJobsCount = DEFAULT_JOBS.length;
 
     let company = {
-      name: 'Apex Retail Partners',
-      contactPerson: 'Rajesh Mehra',
-      email: 'rajesh.employer@etasha.org',
-      phone: '+91 98102 33445',
-      industry: 'Organized Retail & Customer Care',
-      locations: ['South Delhi', 'Noida', 'Gurugram', 'Saket', 'Khanpur'],
-      hiringTarget: 30,
+      name: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      industry: '',
+      locations: [],
+      hiringTarget: 1,
     };
 
     if (isDb) {
@@ -189,9 +96,7 @@ exports.getEmployerProfile = async (req, res) => {
 
       // Seed jobs if empty
       const jobCount = await Job.countDocuments();
-      if (jobCount === 0) {
-        await Job.insertMany(DEFAULT_JOBS);
-      }
+      
       activeJobsCount = await Job.countDocuments({ status: 'active' });
 
       if (req.user && req.user._id) {
@@ -247,12 +152,12 @@ exports.updateEmployerProfile = async (req, res) => {
       success: true,
       message: 'Employer profile updated successfully.',
       company: {
-        name: companyName || 'Apex Retail Partners',
-        contactPerson: contactPerson || 'Rajesh Mehra',
-        industry: industry || 'Organized Retail & Customer Care',
-        phone: phone || '+91 98102 33445',
-        hiringTarget: Number(hiringTarget) || 30,
-        locations: locations || ['South Delhi', 'Noida', 'Gurugram'],
+        name: companyName || '',
+        contactPerson: contactPerson || '',
+        industry: industry || '',
+        phone: phone || '',
+        hiringTarget: Number(hiringTarget) || 1,
+        locations: locations || [],
       },
     });
   } catch (error) {
@@ -268,9 +173,7 @@ exports.getJobs = async (req, res) => {
 
     if (isDb) {
       jobs = await Job.find().sort({ createdAt: -1 });
-      if (jobs.length === 0) {
-        jobs = await Job.insertMany(DEFAULT_JOBS);
-      }
+      
     } else {
       jobs = DEFAULT_JOBS;
     }

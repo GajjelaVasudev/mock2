@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export const Navbar = ({ deferredPrompt, isInstalled, handleInstallClick }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -28,6 +29,8 @@ export const Navbar = ({ deferredPrompt, isInstalled, handleInstallClick }) => {
       </a>
 
       <div className="nav-actions">
+        <LanguageSwitcher />
+        
         <div className={`status-badge ${isOnline ? '' : 'offline'}`}>
           <span className="status-dot"></span>
           <span>{isOnline ? 'Online' : 'Offline'}</span>

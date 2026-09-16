@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Check } from 'lucide-react';
 
 export const DashboardPreview = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   const profile = user?.softSkillsProfile || {
@@ -27,7 +29,7 @@ export const DashboardPreview = () => {
         </div>
         <button className="btn-logout" onClick={logout}>
           <LogOut size={13} />
-          <span>Sign Out</span>
+          <span>{t('dashboards.logout')}</span>
         </button>
       </div>
 
