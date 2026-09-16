@@ -16,16 +16,25 @@ class GeminiProvider(LLMProvider):
     async def generate_response(self, prompt: str) -> str:
         """Simple text generation using Gemini."""
         response = self.client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.6-flash',
             contents=prompt,
         )
         return response.text
         
-    async def generate_structured_response(self, prompt: str, schema: Type[BaseModel]) -> Any:
-        """Generate a response constrained to a Pydantic schema."""
+    async def generate_structured_response(self, prompt: str, schema: Type[BaseModel], audio_bytes: Optional[bytes] = None, mime_type: Optional[str] = None) -> Any:
+        """Generate a response constrained to a Pydantic schema, optionally with audio."""
+        
+        contents = []
+        if audio_bytes and mime_type:
+            from google.genai import types
+            contents.append(
+                types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
+            )
+        contents.append(prompt)
+
         response = self.client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
+            model='gemini-3.6-flash',
+            contents=contents,
             config={
                 'response_mime_type': 'application/json',
                 'response_schema': schema,
