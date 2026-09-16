@@ -204,6 +204,14 @@ export function MockInterview({ question }) {
                                     </ul>
                                 </>
                             )}
+                            {result.feedback.specific_feedback && result.feedback.specific_feedback.length > 0 && (
+                                <>
+                                    <strong>Specific Feedback:</strong>
+                                    <ul>
+                                        {result.feedback.specific_feedback.map((s, i) => <li key={i}>{s}</li>)}
+                                    </ul>
+                                </>
+                            )}
                             {result.feedback.recommendations && result.feedback.recommendations.length > 0 && (
                                 <>
                                     <strong>Recommendations:</strong>
