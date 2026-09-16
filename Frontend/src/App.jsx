@@ -7,6 +7,7 @@ import { DashboardPreview } from './components/DashboardPreview';
 import { TrainerDashboard } from './components/TrainerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EmployerDashboard } from './components/EmployerDashboard';
+import { StudentDashboard } from './components/StudentDashboard';
 
 export function App() {
   const { user } = useAuth();
@@ -97,9 +98,12 @@ export function App() {
           <TrainerDashboard />
         ) : user.role === 'employer' ? (
           <EmployerDashboard />
+        ) : user.role === 'student' || user.role === 'learner' || user.role === 'alumni' ? (
+          <StudentDashboard />
         ) : (
           <DashboardPreview />
-        )}
+        )
+        }
       </main>
 
       {/* Footer */}
