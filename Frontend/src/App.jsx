@@ -6,6 +6,7 @@ import { LoginPage } from './components/LoginPage';
 import { DashboardPreview } from './components/DashboardPreview';
 import { TrainerDashboard } from './components/TrainerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
+import { EmployerDashboard } from './components/EmployerDashboard';
 
 export function App() {
   const { user } = useAuth();
@@ -94,6 +95,8 @@ export function App() {
           <AdminDashboard />
         ) : user.role === 'trainer' ? (
           <TrainerDashboard />
+        ) : user.role === 'employer' ? (
+          <EmployerDashboard />
         ) : (
           <DashboardPreview />
         )}

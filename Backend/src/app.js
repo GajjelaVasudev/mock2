@@ -5,6 +5,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const trainerRoutes = require('./routes/trainer.routes');
 const adminRoutes = require('./routes/admin.routes');
+const employerRoutes = require('./routes/employer.routes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/employer', employerRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

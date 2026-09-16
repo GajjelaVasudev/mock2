@@ -9,6 +9,7 @@ const Task = require('./models/task.model');
 const Center = require('./models/center.model');
 const Cohort = require('./models/cohort.model');
 const Placement = require('./models/placement.model');
+const Pipeline = require('./models/pipeline.model');
 
 const MONGO_URI =
   process.env.MONGO_URI ||
@@ -382,7 +383,63 @@ async function seedDatabase() {
     await Placement.insertMany(placementsData);
     console.log(`Seeded ${placementsData.length} corporate placements.`);
 
-    console.log('All Admin & Multi-role sample data seeded successfully!');
+    // 8. Seed Employer Hiring Pipeline
+    const pipelineData = [
+      {
+        candidateId: insertedStudents[0]._id, // Pooja
+        candidateName: insertedStudents[0].name,
+        employerName: 'Apex Retail Partners',
+        roleApplied: 'Customer Sales & Cash Desk Associate',
+        stage: 'hired',
+        interviewDate: '2026-03-01',
+        offeredSalary: 16500,
+        notes: 'Exceptional communication during mock interviews. Offer accepted.',
+        center: 'Sangam Vihar CDC',
+        batch: 'Batch 2026-A',
+      },
+      {
+        candidateId: insertedStudents[2]._id, // Anjali
+        candidateName: insertedStudents[2].name,
+        employerName: 'Apex Retail Partners',
+        roleApplied: 'Front Office Guest Coordinator',
+        stage: 'offered',
+        interviewDate: '2026-03-12',
+        offeredSalary: 18000,
+        notes: 'High confidence score (86). Offer letter generated pending final verification.',
+        center: 'Sangam Vihar CDC',
+        batch: 'Batch 2026-A',
+      },
+      {
+        candidateId: insertedStudents[4]._id, // Kavita Singh
+        candidateName: insertedStudents[4].name,
+        employerName: 'Apex Retail Partners',
+        roleApplied: 'Retail Floor Associate',
+        stage: 'interview_scheduled',
+        interviewDate: '2026-03-20',
+        interviewTime: '11:00 AM',
+        offeredSalary: 16000,
+        notes: 'Scheduled for virtual round with Store Operations Manager.',
+        center: 'Dakshinpuri CDC',
+        batch: 'Batch 2026-A',
+      },
+      {
+        candidateId: insertedStudents[7]._id, // Deepak Verma
+        candidateName: insertedStudents[7].name,
+        employerName: 'Apex Retail Partners',
+        roleApplied: 'Inventory & Customer Helpdesk',
+        stage: 'shortlisted',
+        offeredSalary: 16500,
+        notes: 'Shortlisted based on high attendance (86%) and active participation.',
+        center: 'Sangam Vihar CDC',
+        batch: 'Batch 2026-A',
+      },
+    ];
+
+    await Pipeline.deleteMany({});
+    await Pipeline.insertMany(pipelineData);
+    console.log(`Seeded ${pipelineData.length} pipeline candidates.`);
+
+    console.log('All Admin, Trainer, Learner & Employer sample data seeded successfully!');
     process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error);
